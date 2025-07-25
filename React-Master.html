@@ -1,0 +1,2753 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>React BQ Study App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .question-indicator {
+      background-color: #f3e5f5;
+      border-left: 4px solid #9c27b0;
+      padding: 2px 6px;
+      margin: 2px 0;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #7b1fa2;
+    }
+    .statement-indicator {
+      background-color: #e1f5fe;
+      border-left: 4px solid #2196f3;
+      padding: 2px 6px;
+      margin: 2px 0;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #1976d2;
+    }
+
+    .exclamation-indicator {
+      background-color: #fff3e0;
+      border-left: 4px solid #ff9800;
+      padding: 2px 6px;
+      margin: 2px 0;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #f57c00;
+    }
+
+    .verse-statement-flags {
+      margin-top: 5px;
+    }
+    .division-filter-controls {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    .division-toggles {
+      margin-bottom: 10px;
+    }
+
+    .division-toggle {
+      margin-right: 10px;
+      margin-bottom: 5px;
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+      border-radius: 3px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .division-toggle.active {
+      background-color: #9c27b0;
+      color: white;
+    }
+
+    .division-stats {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .division-toggle {
+        display: block;
+        margin-bottom: 5px;
+        margin-right: 0;
+        width: 100%;
+      }
+    }
+    .charting-filter-controls {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    .charting-category-toggles {
+      margin-bottom: 10px;
+    }
+
+    .charting-category-toggle {
+      margin-right: 10px;
+      margin-bottom: 5px;
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+      border-radius: 3px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .charting-category-toggle.active {
+      background-color: #ff9800;
+      color: white;
+    }
+
+    .charting-stats {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .charting-category-toggle {
+        display: block;
+        margin-bottom: 5px;
+        margin-right: 0;
+        width: 100%;
+      }
+    }
+    .word-filter-controls {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    .word-type-toggles {
+      margin-bottom: 10px;
+    }
+
+    .word-type-toggle {
+      margin-right: 10px;
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .word-type-toggle.active {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .word-list-button {
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .word-list-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .word-list-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      max-height: 200px;
+      overflow-y: auto;
+      min-width: 200px;
+      z-index: 1000;
+    }
+
+    .word-list-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+
+    .word-list-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .word-list-item.selected {
+      background-color: #e3f2fd;
+    }
+
+    @media (max-width: 768px) {
+      .word-type-toggle {
+        display: block;
+        margin-bottom: 5px;
+        margin-right: 0;
+      }
+
+      .word-list-menu {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90%;
+        max-height: 60%;
+      }
+    }
+    .verse-beginning {
+      text-decoration: underline;
+      font-weight: bold;
+    }
+
+    .highlighted {
+      font-weight: bold;
+    }
+
+    .highlighted.type1 {
+      color: red;
+    }
+
+    .highlighted.type2 {
+      color: blue;
+    }
+
+    .highlighted.type3 {
+      color: green;
+    }
+
+    /* When highlighted words are inside verse-beginning, they inherit the underline */
+    .verse-beginning .highlighted {
+      text-decoration: underline;
+      font-weight: bold;
+    }
+    .search-highlight {
+      background-color: yellow;
+      font-weight: bold;
+    }
+    .verse-list {
+      list-style: none;
+      padding: 0;
+    }
+    .verse-item {
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+      position: relative;
+    }
+    .verse-item.learned {
+      background-color: #e8f5e8;
+      border-color: #4caf50;
+    }
+    .subsection {
+        margin-left: 20px; /* Indent subsections */
+    }
+    .controls {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+    .filter-controls {
+      margin-bottom: 15px;
+    }
+    .filter-controls label {
+      margin-right: 15px;
+      display: inline-block;
+    }
+    .learned-button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .learned-button.learned {
+      background-color: #2196f3;
+    }
+    .learned-button:hover {
+      opacity: 0.8;
+    }
+    .stats {
+      margin-top: 10px;
+      font-style: italic;
+      color: #666;
+    }
+    .search-box {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+    .search-box:focus {
+      border-color: #4caf50;
+      outline: none;
+    }
+    .search-results {
+      color: #666;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+    .clear-search {
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .clear-search:hover {
+      opacity: 0.8;
+    }
+    .word-frequency-legend {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+    .legend-item {
+      display: inline-block;
+      margin-right: 20px;
+      font-size: 14px;
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+      .controls {
+        padding: 10px;
+      }
+      
+      .filter-controls label {
+        display: block;
+        margin-bottom: 10px;
+        margin-right: 0;
+      }
+      
+      .search-box {
+        max-width: 100%;
+      }
+      
+      .verse-item {
+        padding: 8px;
+        margin-bottom: 8px;
+      }
+      
+      .learned-button {
+        display: block;
+        margin: 10px 0 0 0;
+        width: 100%;
+      }
+
+      .subsection {
+        margin-left: 10px;
+      }
+
+      .clear-search {
+        display: block;
+        margin: 10px 0;
+        width: 100%;
+      }
+
+      .legend-item {
+        display: block;
+        margin-bottom: 5px;
+      }
+    }
+
+    /* Better touch targets */
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+
+    button {
+      min-height: 44px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    
+    const bibleData = {
+        "sections": 
+[
+        {
+              "sectionNumber": "1",
+              "sectionTitle": "The Word of God",
+              "subsections": [
+        {
+          "subsectionNumber": "1A",
+          "subsectionTitle": "God Himself is the Author of the Bible. It is the Word of God.",
+          "verseCount": 10,
+          "totalVerseCount": 10,
+          "verses": [
+            {
+              "reference": "Exodus 24:12",
+              "text": "And the Lord said unto Moses, Come/ up to me into the mount, and be there: and I will give thee tables of stone, and a law, and commandments which I have written; that thou mayest teach them.",
+              "highlights": [
+                { "word": "Moses", "type": "type3" }
+              ],
+              "chartingType": "cross-reference",
+              "divisions": ["Beginner", "JR"]
+            },
+            {
+              "reference": "Deuteronomy 6:6",
+              "text": "And these words,/ which I command thee this day, shall be in thine heart:",
+              "highlights": [],
+              "divisions": ["Beginner", "JR"]
+            },
+            {
+              "reference": "Deuteronomy 6:7",
+              "text": "And thou shalt teach them diligently unto thy children, and shalt talk of them when thou sittest in thine house, and when thou walkest by the way, and when thou liest down, and when thou risest up.",
+              "highlights": [],
+              "chartingType": "cross-reference"
+            },
+            {
+              "reference": "Deuteronomy 6:8",
+              "text": "And thou shalt bind them for a sign upon thine hand, and they shall be as frontlets between thine eyes.",
+              "highlights": []
+            },
+            {
+              "reference": "Deuteronomy 6:9",
+              "text": "And thou shalt write them upon the posts of thy house, and on thy gates.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 19:7",
+              "text": "The law of the Lord is perfect, converting the soul: the testimony of the Lord is sure, making wise the simple.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 19:8",
+              "text": "The statutes of the Lord are right, rejoicing the heart: the commandment of the Lord is pure, enlightening the eyes.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 19:9",
+              "text": "The fear of the Lord is clean, enduring for ever: the judgments of the Lord are true and righteous altogether.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 19:10",
+              "text": "More to be desired are they than gold, yea, than much fine gold: sweeter also than honey and the honeycomb.",
+              "highlights": []
+            },
+            {
+              "reference": "Hebrews 4:12",
+              "text": "For the word of God is quick, and powerful, and sharper than any twoedged sword, piercing even to the dividing asunder of soul and spirit, and of the joints and marrow, and is a discerner of the thoughts and intents of the heart.",
+              "highlights": []
+            }
+          ]
+        },
+        {
+          "subsectionNumber": "1B",
+          "subsectionTitle": "Men wrote the words of the Bible as they were divinely inspired by God.",
+          "verseCount": 9,
+          "totalVerseCount": 19,
+          "verses": [
+            {
+              "reference": "Exodus 34:27",
+              "text": "And the Lord said unto Moses, Write thou these words: for after the tenor of these words I have made a covenant with thee and with Israel.",
+              "highlights": []
+            },
+            {
+              "reference": "Isaiah 30:8",
+              "text": "Now go, write it before them in a table, and note it in a book, that it may be for the time to come for ever and ever:",
+              "highlights": []
+            },
+            {
+              "reference": "Jeremiah 30:1",
+              "text": "The word that came to Jeremiah from the Lord, saying,",
+              "highlights": []
+            },
+            {
+              "reference": "Jeremiah 30:2",
+              "text": "Thus speaketh the Lord God of Israel, saying, Write thee all the words that I have spoken unto thee in a book.",
+              "highlights": []
+            },
+            {
+              "reference": "2 Timothy 3:16",
+              "text": "All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness:",
+              "highlights": []
+            },
+            {
+              "reference": "2 Timothy 3:17",
+              "text": "That the man of God may be perfect, thoroughly furnished unto all good works.",
+              "highlights": []
+            },
+            {
+              "reference": "Hebrews 1:1",
+              "text": "God, who at sundry times and in divers manners spake in time past unto the fathers by the prophets,",
+              "highlights": []
+            },
+            {
+              "reference": "2 Peter 1:20",
+              "text": "Knowing this first, that no prophecy of the scripture is of any private interpretation.",
+              "highlights": []
+            },
+            {
+              "reference": "2 Peter 1:21",
+              "text": "For the prophecy came not in old time by the will of man: but holy men of God spake as they were moved by the Holy Ghost.",
+              "highlights": []
+            }
+          ]
+        },
+        {
+          "subsectionNumber": "1C",
+          "subsectionTitle": "The Bible is without error. It is the word of salvation and will be true and useful forever.",
+          "verseCount": 14,
+          "totalVerseCount": 33,
+          "verses": [
+            {
+              "reference": "Psalms 12:6",
+              "text": "The words of the Lord are pure words: as silver tried in a furnace of earth, purified seven times.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:9",
+              "text": "Wherewithal shall a young man cleanse his way? by taking heed thereto according to thy word.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:89",
+              "text": "For ever, O Lord, thy word is settled in heaven.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:105",
+              "text": "Thy word is a lamp unto my feet, and a light unto my path.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:130",
+              "text": "The entrance of thy words giveth light; it giveth understanding unto the simple.",
+              "highlights": []
+            },
+            {
+              "reference": "Proverbs 30:5",
+              "text": "Every word of God is pure: he is a shield unto them that put their trust in him.",
+              "highlights": []
+            },
+            {
+              "reference": "Isaiah 40:8",
+              "text": "The grass withereth, the flower fadeth: but the word of our God shall stand for ever.",
+              "highlights": []
+            },
+            {
+              "reference": "Luke 21:33",
+              "text": "Heaven and earth shall pass away: but my words shall not pass away.",
+              "highlights": []
+            },
+            {
+              "reference": "John 17:17",
+              "text": "Sanctify them through thy truth: thy word is truth.",
+              "highlights": []
+            },
+            {
+              "reference": "John 20:30",
+              "text": "And many other signs truly did Jesus in the presence of his disciples, which are not written in this book:",
+              "highlights": []
+            },
+            {
+              "reference": "John 20:31",
+              "text": "But these are written, that ye might believe that Jesus is the Christ, the Son of God; and that believing ye might have life through his name.",
+              "highlights": []
+            },
+            {
+              "reference": "Romans 1:16",
+              "text": "For I am not ashamed of the gospel of Christ: for it is the power of God unto salvation to every one that believeth; to the Jew first, and also to the Greek.",
+              "highlights": []
+            },
+            {
+              "reference": "Romans 15:4",
+              "text": "For whatsoever things were written aforetime were written for our learning, that we through patience and comfort of the scriptures might have hope.",
+              "highlights": []
+            },
+            {
+              "reference": "1 Corinthians 10:11",
+              "text": "Now all these things happened unto them for examples; and they are written for our admonition, upon whom the ends of the world are come.",
+              "highlights": []
+            }
+          ]
+        },
+        {
+          "subsectionNumber": "1D",
+          "subsectionTitle": "The Word of God is food for our soul.",
+          "verseCount": 5,
+          "totalVerseCount": 38,
+          "verses": [
+            {
+              "reference": "Job 23:12",
+              "text": "Neither have I gone back from the commandment of his lips; I have esteemed the words of his mouth more than my necessary food.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:103",
+              "text": "How sweet are thy words unto my taste! yea, sweeter than honey to my mouth!",
+              "highlights": []
+            },
+            {
+              "reference": "Jeremiah 15:16",
+              "text": "Thy words were found, and I did eat them; and thy word was unto me the joy and rejoicing of mine heart: for I am called by thy name, O Lord God of hosts.",
+              "highlights": []
+            },
+            {
+              "reference": "Matthew 4:4",
+              "text": "But he answered and said, It is written, Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God.",
+              "highlights": []
+            },
+            {
+              "reference": "1 Peter 2:2",
+              "text": "As newborn babes, desire the sincere milk of the word, that ye may grow thereby:",
+              "highlights": []
+            }
+          ]
+        },
+        {
+          "subsectionNumber": "1E",
+          "subsectionTitle": "The Word of God should be loved and hidden in our hearts.",
+          "verseCount": 10,
+          "totalVerseCount": 48,
+          "verses": [
+            {
+              "reference": "Deuteronomy 17:19",
+              "text": "And it shall be with him, and he shall read therein all the days of his life: that he may learn to fear the Lord his God, to keep all the words of this law and these statutes, to do them:",
+              "highlights": []
+            },
+            {
+              "reference": "Joshua 1:8",
+              "text": "This book of the law shall not depart out of thy mouth; but thou shalt meditate therein day and night, that thou mayest observe to do according to all that is written therein: for then thou shalt make thy way prosperous, and then thou shalt have good success.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 37:31",
+              "text": "The law of his God is in his heart; none of his steps shall slide.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 40:8",
+              "text": "I delight to do thy will, O my God: yea, thy law is within my heart.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:11",
+              "text": "Thy word have I hid in mine heart, that I might not sin against thee.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:16",
+              "text": "I will delight myself in thy statutes: I will not forget thy word.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:72",
+              "text": "The law of thy mouth is better unto me than thousands of gold and silver.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:97",
+              "text": "O how love I thy law! it is my meditation all the day.",
+              "highlights": []
+            },
+            {
+              "reference": "Psalms 119:140",
+              "text": "Thy word is very pure: therefore thy servant loveth it.",
+              "highlights": []
+            },
+            {
+              "reference": "Colossians 3:16",
+              "text": "Let the word of Christ dwell in you richly in all wisdom; teaching and admonishing one another in psalms and hymns and spiritual songs, singing with grace in your hearts to the Lord.",
+              "highlights": []
+            }
+          ]
+        }
+      ]
+            },
+            {
+                "sectionNumber": "2",
+                "sectionTitle": "ONE GOD: THE MIGHTY GOD IN CHRIST",
+                "subsections": [
+                  {
+                    "subsectionNumber": "2A",
+                    "subsectionTitle": "How many Gods exist?",
+                    "verseCount": 10,
+                    "totalVerseCount": 58,
+                    "verses": [
+        {
+          "reference": "Deuteronomy 4:35",
+          "text": "Unto thee it was shewed, that thou mightest know that the Lord he is God; there is none else beside him.",
+          "highlights": []
+        },
+        {
+          "reference": "Deuteronomy 6:4",
+          "text": "Hear, O Israel: The Lord our God is one Lord:",
+          "highlights": []
+        },
+        {
+          "reference": "Isaiah 43:10",
+          "text": "Ye are my witnesses, saith the Lord, and my servant whom I have chosen: that ye may know and believe me, and understand that I am he: before me there was no God formed, neither shall there be after me.",
+          "highlights": []
+        },
+        {
+          "reference": "Isaiah 43:11",
+          "text": "I, even I, am the Lord; and beside me there is no saviour.",
+          "highlights": []
+        },
+        {
+          "reference": "Mark 12:29",
+          "text": "And Jesus answered him, The first of all the commandments is, Hear, O Israel; The Lord our God is one Lord:",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:5",
+          "text": "One Lord, one faith, one baptism,",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:6",
+          "text": "One God and Father of all, who is above all, and through all, and in you all.",
+          "highlights": []
+        },
+        {
+          "reference": "1 Timothy 2:5",
+          "text": "For there is one God, and one mediator between God and men, the man Christ Jesus;",
+          "highlights": []
+        },
+        {
+          "reference": "James 2:19",
+          "text": "Thou believest that there is one God; thou doest well: the devils also believe, and tremble.",
+          "highlights": []
+        },
+        {
+          "reference": "Revelation 1:8",
+          "text": "I am Alpha and Omega, the beginning and the ending, saith the Lord, which is, and which was, and which is to come, the Almighty.",
+          "highlights": []
+        }
+      ]
+                  },
+                  {
+                    "subsectionNumber": "2B",
+                    "subsectionTitle": "God is a Spirit.",
+                    "verseCount": 4,
+                    "totalVerseCount": 62,
+                    "verses": [
+        {
+          "reference": "John 4:24",
+          "text": "God is a Spirit: and they that worship him must worship him in spirit and in truth.",
+          "highlights": []
+        },
+        {
+          "reference": "Acts 17:24",
+          "text": "God that made the world and all things therein, seeing that he is Lord of heaven and earth, dwelleth not in temples made with hands;",
+          "highlights": []
+        },
+        {
+          "reference": "Acts 17:25",
+          "text": "Neither is worshipped with men's hands, as though he needed any thing, seeing he giveth to all life, and breath, and all things;",
+          "highlights": []
+        },
+        {
+          "reference": "2 Corinthians 3:17",
+          "text": "Now the Lord is that Spirit: and where the Spirit of the Lord is, there is liberty.",
+          "highlights": []
+        }
+      ]
+                  },
+                  {
+                    "subsectionNumber": "2C",
+                    "subsectionTitle": "The one mighty God was manifest in the flesh as Jesus Christ, both man and God, the fullness of the Godhead dwelling in Him.",
+                    "verseCount": 21,
+                    "totalVerseCount": 83,
+                    "verses": [
+        {
+          "reference": "Isaiah 9:6",
+          "text": "For unto us a child is born, unto us a son is given: and the government shall be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty God, The everlasting Father, The Prince of Peace.",
+          "highlights": []
+        },
+        {
+          "reference": "Matthew 1:20",
+          "text": "But while he thought on these things, behold, the angel of the Lord appeared unto him in a dream, saying, Joseph, thou son of David, fear not to take unto thee Mary thy wife: for that which is conceived in her is of the Holy Ghost.",
+          "highlights": []
+        },
+        {
+          "reference": "Matthew 1:21",
+          "text": "And she shall bring forth a son, and thou shalt call his name Jesus: for he shall save his people from their sins.",
+          "highlights": []
+        },
+        {
+          "reference": "Matthew 1:22",
+          "text": "Now all this was done, that it might be fulfilled which was spoken of the Lord by the prophet, saying,",
+          "highlights": []
+        },
+        {
+          "reference": "Matthew 1:23",
+          "text": "Behold, a virgin shall be with child, and shall bring forth a son, and they shall call his name Emmanuel, which being interpreted is, God with us.",
+          "highlights": []
+        },
+        {
+          "reference": "John 1:1",
+          "text": "In the beginning was the Word, and the Word was with God, and the Word was God.",
+          "highlights": []
+        },
+        {
+          "reference": "John 1:14",
+          "text": "And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth.",
+          "highlights": []
+        },
+        {
+          "reference": "John 8:57",
+          "text": "Then said the Jews unto him, Thou art not yet fifty years old, and hast thou seen Abraham?",
+          "highlights": []
+        },
+        {
+          "reference": "John 8:58",
+          "text": "Jesus said unto them, Verily, verily, I say unto you, Before Abraham was, I am.",
+          "highlights": []
+        },
+        {
+          "reference": "John 10:30",
+          "text": "I and my Father are one.",
+          "highlights": []
+        },
+        {
+          "reference": "John 14:8",
+          "text": "Philip saith unto him, Lord, shew us the Father, and it sufficeth us.",
+          "highlights": []
+        },
+        {
+          "reference": "John 14:9",
+          "text": "Jesus saith unto him, Have I been so long time with you, and yet hast thou not known me, Philip? he that hath seen me hath seen the Father; and how sayest thou then, Shew us the Father?",
+          "highlights": []
+        },
+        {
+          "reference": "John 14:10",
+          "text": "Believest thou not that I am in the Father, and the Father in me? the words that I speak unto you I speak not of myself: but the Father that dwelleth in me, he doeth the works.",
+          "highlights": []
+        },
+        {
+          "reference": "Philippians 2:5",
+          "text": "Let this mind be in you, which was also in Christ Jesus:",
+          "highlights": []
+        },
+        {
+          "reference": "Philippians 2:6",
+          "text": "Who, being in the form of God, thought it not robbery to be equal with God:",
+          "highlights": []
+        },
+        {
+          "reference": "Philippians 2:7",
+          "text": "But made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men:",
+          "highlights": []
+        },
+        {
+          "reference": "Philippians 2:8",
+          "text": "And being found in fashion as a man, he humbled himself, and became obedient unto death, even the death of the cross.",
+          "highlights": []
+        },
+        {
+          "reference": "Colossians 1:19",
+          "text": "For it pleased the Father that in him should all fulness dwell;",
+          "highlights": []
+        },
+        {
+          "reference": "Colossians 2:9",
+          "text": "For in him dwelleth all the fulness of the Godhead bodily.",
+          "highlights": []
+        },
+        {
+          "reference": "1 Timothy 3:16",
+          "text": "And without controversy great is the mystery of godliness: God was manifest in the flesh, justified in the Spirit, seen of angels, preached unto the Gentiles, believed on in the world, received up into glory.",
+          "highlights": []
+        },
+        {
+          "reference": "Acts 4:12",
+          "text": "Neither is there salvation in any other: for there is none other name under heaven given among men, whereby we must be saved.",
+          "highlights": []
+        }
+      ]
+                  }
+                ]
+            },
+            {
+               "sectionNumber": "3",
+               "sectionTitle": "SIN AND SALVATION",
+               "subsections": [
+    {
+      "subsectionNumber": "3A",
+      "subsectionTitle": "What is sin?",
+      "verseCount": 4,
+      "totalVerseCount": 87,
+      "verses": [
+        {
+          "reference": "Proverbs 21:4",
+          "text": "An high look, and a proud heart, and the plowing of the wicked, is sin.",
+          "highlights": []
+        },
+        {
+          "reference": "Proverbs 24:9",
+          "text": "The thought of foolishness is sin: and the scorner is an abomination to men.",
+          "highlights": []
+        },
+        {
+          "reference": "James 4:17",
+          "text": "Therefore to him that knoweth to do good, and doeth it not, to him it is sin.",
+          "highlights": []
+        },
+        {
+          "reference": "1 John 3:4",
+          "text": "Whosoever committeth sin transgresseth also the law: for sin is the transgression of the law.",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "3B",
+      "subsectionTitle": "Man is a sinner.",
+      "verseCount": 12,
+      "totalVerseCount": 99,
+      "verses": [
+        {
+          "reference": "Psalms 51:5",
+          "text": "Behold, I was shapen in iniquity; and in sin did my mother conceive me.",
+          "highlights": []
+        },
+        {
+          "reference": "Isaiah 53:6",
+          "text": "All we like sheep have gone astray; we have turned every one to his own way; and the Lord hath laid on him the iniquity of us all.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 3:10",
+          "text": "As it is written, There is none righteous, no, not one:",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 3:11",
+          "text": "There is none that understandeth, there is none that seeketh after God.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 3:12",
+          "text": "They are all gone out of the way, they are together become unprofitable; there is none that doeth good, no, not one.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 3:23",
+          "text": "For all have sinned, and come short of the glory of God;",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 5:12",
+          "text": "Wherefore, as by one man sin entered into the world, and death by sin; and so death passed upon all men, for that all have sinned:",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 5:19",
+          "text": "For as by one man's disobedience many were made sinners, so by the obedience of one shall many be made righteous.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 6:23",
+          "text": "For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord.",
+          "highlights": []
+        },
+        {
+          "reference": "James 1:14",
+          "text": "But every man is tempted, when he is drawn away of his own lust, and enticed.",
+          "highlights": []
+        },
+        {
+          "reference": "James 1:15",
+          "text": "Then when lust hath conceived, it bringeth forth sin: and sin, when it is finished, bringeth forth death.",
+          "highlights": []
+        },
+        {
+          "reference": "1 John 1:8",
+          "text": "If we say that we have no sin, we deceive ourselves, and the truth is not in us.",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "3C",
+      "subsectionTitle": "Jesus Christ provides salvation.",
+      "verseCount": 10,
+      "totalVerseCount": 109,
+      "verses": [
+        {
+          "reference": "Isaiah 12:2",
+          "text": "Behold, God is my salvation; I will trust, and not be afraid: for the Lord Jehovah is my strength and my song; he also is become my salvation.",
+          "highlights": []
+        },
+        {
+          "reference": "Luke 2:11",
+          "text": "For unto you is born this day in the city of David a Saviour, which is Christ the Lord.",
+          "highlights": []
+        },
+        {
+          "reference": "Luke 19:10",
+          "text": "For the Son of man is come to seek and to save that which was lost.",
+          "highlights": []
+        },
+        {
+          "reference": "John 1:29",
+          "text": "The next day John seeth Jesus coming unto him, and saith, Behold the Lamb of God, which taketh away the sin of the world.",
+          "highlights": []
+        },
+        {
+          "reference": "John 3:14",
+          "text": "And as Moses lifted up the serpent in the wilderness, even so must the Son of man be lifted up:",
+          "highlights": []
+        },
+        {
+          "reference": "John 3:15",
+          "text": "That whosoever believeth in him should not perish, but have eternal life.",
+          "highlights": []
+        },
+        {
+          "reference": "John 3:16",
+          "text": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
+          "highlights": []
+        },
+        {
+          "reference": "John 3:17",
+          "text": "For God sent not his Son into the world to condemn the world; but that the world through him might be saved.",
+          "highlights": []
+        },
+        {
+          "reference": "John 15:13",
+          "text": "Greater love hath no man than this, that a man lay down his life for his friends.",
+          "highlights": []
+        },
+        {
+          "reference": "1 Timothy 1:15",
+          "text": "This is a faithful saying, and worthy of all acceptation, that Christ Jesus came into the world to save sinners; of whom I am chief.",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "3D",
+      "subsectionTitle": "The blood of a sinless sacrifice atoned for our sins.",
+      "verseCount": 5,
+      "totalVerseCount": 114,
+      "verses": [
+        {
+          "reference": "Exodus 12:13",
+          "text": "And the blood shall be to you for a token upon the houses where ye are: and when I see the blood, I will pass over you, and the plague shall not be upon you to destroy you, when I smite the land of Egypt.",
+          "highlights": []
+        },
+        {
+          "reference": "Leviticus 17:11",
+          "text": "For the life of the flesh is in the blood: and I have given it to you upon the altar to make an atonement for your souls: for it is the blood that maketh an atonement for the soul.",
+          "highlights": []
+        },
+        {
+          "reference": "Matthew 26:28",
+          "text": "For this is my blood of the new testament, which is shed for many for the remission of sins.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 5:9",
+          "text": "Much more then, being now justified by his blood, we shall be saved from wrath through him.",
+          "highlights": []
+        },
+        {
+          "reference": "Hebrews 9:14",
+          "text": "How much more shall the blood of Christ, who through the eternal Spirit offered himself without spot to God, purge your conscience from dead works to serve the living God?",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "3E",
+      "subsectionTitle": "Obedience is essential to salvation.",
+      "verseCount": 4,
+      "totalVerseCount": 118,
+      "verses": [
+        {
+          "reference": "1 Samuel 15:22",
+          "text": "And Samuel said, Hath the Lord as great delight in burnt offerings and sacrifices, as in obeying the voice of the Lord? Behold, to obey is better than sacrifice, and to hearken than the fat of rams.",
+          "highlights": []
+        },
+        {
+          "reference": "John 8:31",
+          "text": "Then said Jesus to those Jews which believed on him, If ye continue in my word, then are ye my disciples indeed;",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 6:16",
+          "text": "Know ye not, that to whom ye yield yourselves servants to obey, his servants ye are to whom ye obey; whether of sin unto death, or of obedience unto righteousness?",
+          "highlights": []
+        },
+        {
+          "reference": "Revelation 22:14",
+          "text": "Blessed are they that do his commandments, that they may have right to the tree of life, and may enter in through the gates into the city.",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "3F",
+      "subsectionTitle": "Saving faith and belief.",
+      "verseCount": 9,
+      "totalVerseCount": 127,
+      "verses": [
+        {
+          "reference": "Mark 16:16",
+          "text": "He that believeth and is baptized shall be saved; but he that believeth not shall be damned.",
+          "highlights": []
+        },
+        {
+          "reference": "Acts 16:31",
+          "text": "And they said, Believe on the Lord Jesus Christ, and thou shalt be saved, and thy house.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 10:9",
+          "text": "That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 10:10",
+          "text": "For with the heart man believeth unto righteousness; and with the mouth confession is made unto salvation.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 10:11",
+          "text": "For the scripture saith, Whosoever believeth on him shall not be ashamed.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 10:12",
+          "text": "For there is no difference between the Jew and the Greek: for the same Lord over all is rich unto all that call upon him.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 10:13",
+          "text": "For whosoever shall call upon the name of the Lord shall be saved.",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 2:8",
+          "text": "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God:",
+          "highlights": []
+        },
+        {
+          "reference": "Hebrews 11:6",
+          "text": "But without faith it is impossible to please him: for he that cometh to God must believe that he is, and that he is a rewarder of them that diligently seek him.",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "3G",
+      "subsectionTitle": "Repentance is essential to salvation.",
+      "verseCount": 8,
+      "totalVerseCount": 135,
+      "verses": [
+        {
+          "reference": "2 Chronicles 7:14",
+          "text": "If my people, which are called by my name, shall humble themselves, and pray, and seek my face, and turn from their wicked ways; then will I hear from heaven, and will forgive their sin, and will heal their land.",
+          "highlights": []
+        },
+        {
+          "reference": "Psalms 34:18",
+          "text": "The Lord is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.",
+          "highlights": []
+        },
+        {
+          "reference": "Isaiah 55:7",
+          "text": "Let the wicked forsake his way, and the unrighteous man his thoughts: and let him return unto the Lord, and he will have mercy upon him; and to our God, for he will abundantly pardon.",
+          "highlights": []
+        },
+        {
+          "reference": "Ezekiel 18:21",
+          "text": "But if the wicked will turn from all his sins that he hath committed, and keep all my statutes, and do that which is lawful and right, he shall surely live, he shall not die.",
+          "highlights": []
+        },
+        {
+          "reference": "Luke 13:3",
+          "text": "I tell you, Nay: but, except ye repent, ye shall all likewise perish.",
+          "highlights": []
+        },
+        {
+          "reference": "Acts 2:38",
+          "text": "Then Peter said unto them, Repent, and be baptized every one of you in the name of Jesus Christ for the remission of sins, and ye shall receive the gift of the Holy Ghost.",
+          "highlights": []
+        },
+        {
+          "reference": "Acts 3:19",
+          "text": "Repent ye therefore, and be converted, that your sins may be blotted out, when the times of refreshing shall come from the presence of the Lord.",
+          "highlights": []
+        },
+        {
+          "reference": "Acts 17:30",
+          "text": "And the times of this ignorance God winked at; but now commandeth all men every where to repent:",
+          "highlights": []
+        }
+      ]
+    },
+    {
+  "subsectionNumber": "3H",
+  "subsectionTitle": "Water baptism is essential to salvation.",
+  "verseCount": 3,
+  "totalVerseCount": 138,
+  "verses": [
+    {
+      "reference": "John 3:5",
+      "text": "Jesus answered, Verily, verily, I say unto thee, Except a man be born of water and of the Spirit, he cannot enter into the kingdom of God.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Peter 3:20",
+      "text": "Which sometime were disobedient, when once the longsuffering of God waited in the days of Noah, while the ark was a preparing, wherein few, that is, eight souls were saved by water.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Peter 3:21",
+      "text": "The like figure whereunto even baptism doth also now save us (not the putting away of the filth of the flesh, but the answer of a good conscience toward God,) by the resurrection of Jesus Christ:",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "3H1",
+  "subsectionTitle": "Water baptism should be performed in the name of the Lord Jesus Christ.",
+  "verseCount": 6,
+  "totalVerseCount": 144,
+  "verses": [
+    {
+      "reference": "Acts 8:12",
+      "text": "But when they believed Philip preaching the things concerning the kingdom of God, and the name of Jesus Christ, they were baptized, both men and women.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 10:47",
+      "text": "Can any man forbid water, that these should not be baptized, which have received the Holy Ghost as well as we?",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 10:48",
+      "text": "And he commanded them to be baptized in the name of the Lord. Then prayed they him to tarry certain days.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 19:5",
+      "text": "When they heard this, they were baptized in the name of the Lord Jesus.",
+      "highlights": []
+    },
+    {
+      "reference": "Romans 6:3",
+      "text": "Know ye not, that so many of us as were baptized into Jesus Christ were baptized into his death?",
+      "highlights": []
+    },
+    {
+      "reference": "Galatians 3:27",
+      "text": "For as many of you as have been baptized into Christ have put on Christ.",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "3H2",
+  "subsectionTitle": "Water Baptism should be performed by immersion",
+  "verseCount": 3,
+  "totalVerseCount": 147,
+  "verses": [
+    {
+      "reference": "Matthew 3:16",
+      "text": "And Jesus, when he was baptized, went up straightway out of the water: and, lo, the heavens were opened unto him, and he saw the Spirit of God descending like a dove, and lighting upon him:",
+      "highlights": []
+    },
+    {
+      "reference": "John 3:23",
+      "text": "And John also was baptizing in Aenon near to Salim, because there was much water there: and they came, and were baptized.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 8:38",
+      "text": "And he commanded the chariot to stand still: and they went down both into the water, both Philip and the eunuch; and he baptized him.",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "3I",
+  "subsectionTitle": "The baptism of the Holy Ghost is essential to salvation.",
+  "verseCount": 13,
+  "totalVerseCount": 160,
+  "verses": [
+    {
+      "reference": "Ezekiel 36:26",
+      "text": "A new heart also will I give you, and a new spirit will I put within you: and I will take away the stony heart out of your flesh, and I will give you an heart of flesh.",
+      "highlights": []
+    },
+    {
+      "reference": "Ezekiel 36:27",
+      "text": "And I will put my spirit within you, and cause you to walk in my statutes, and ye shall keep my judgments, and do them.",
+      "highlights": []
+    },
+    {
+      "reference": "Luke 24:49",
+      "text": "And, behold, I send the promise of my Father upon you: but tarry ye in the city of Jerusalem, until ye be endued with power from on high.",
+      "highlights": []
+    },
+    {
+      "reference": "John 3:7",
+      "text": "Marvel not that I said unto thee, Ye must be born again.",
+      "highlights": []
+    },
+    {
+      "reference": "John 3:8",
+      "text": "The wind bloweth where it listeth, and thou hearest the sound thereof, but canst not tell whence it cometh, and whither it goeth: so is every one that is born of the Spirit.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 1:4",
+      "text": "And, being assembled together with them, commanded them that they should not depart from Jerusalem, but wait for the promise of the Father, which, saith he, ye have heard of me.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 1:5",
+      "text": "For John truly baptized with water; but ye shall be baptized with the Holy Ghost not many days hence.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:16",
+      "text": "But this is that which was spoken by the prophet Joel;",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:39",
+      "text": "For the promise is unto you, and to your children, and to all that are afar off, even as many as the Lord our God shall call.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 10:44",
+      "text": "While Peter yet spake these words, the Holy Ghost fell on all them which heard the word.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 10:45",
+      "text": "And they of the circumcision which believed were astonished, as many as came with Peter, because that on the Gentiles also was poured out the gift of the Holy Ghost.",
+      "highlights": []
+    },
+    {
+      "reference": "Romans 8:9",
+      "text": "But ye are not in the flesh, but in the Spirit, if so be that the Spirit of God dwell in you. Now if any man have not the Spirit of Christ, he is none of his.",
+      "highlights": []
+    },
+    {
+      "reference": "Romans 8:10",
+      "text": "And if Christ be in you, the body is dead because of sin; but the Spirit is life because of righteousness.",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "3I1",
+  "subsectionTitle": "Speaking in tongues is the initial, outward evidence of the infilling of the Holy Ghost.",
+  "verseCount": 9,
+  "totalVerseCount": 168,
+  "verses": [
+    {
+      "reference": "Mark 16:17",
+      "text": "And these signs shall follow them that believe; In my name shall they cast out devils; they shall speak with new tongues;",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:1",
+      "text": "And when the day of Pentecost was fully come, they were all with one accord in one place.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:2",
+      "text": "And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:3",
+      "text": "And there appeared unto them cloven tongues like as of fire, and it sat upon each of them.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:4",
+      "text": "And they were all filled with the Holy Ghost, and began to speak with other tongues, as the Spirit gave them utterance.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:5",
+      "text": "And there were dwelling at Jerusalem Jews, devout men, out of every nation under heaven.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:6",
+      "text": "Now when this was noised abroad, the multitude came together, and were confounded, because that every man heard them speak in his own language.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:7",
+      "text": "And they were all amazed and marvelled, saying one to another, Behold, are not all these which speak Galilaeans?",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 2:8",
+      "text": "And how hear we every man in our own tongue, wherein we were born?",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "3I2",
+  "subsectionTitle": "The benefits of the baptism of the Holy Ghost.",
+  "verseCount": 4,
+  "totalVerseCount": 173,
+  "verses": [
+    {
+      "reference": "Luke 12:12",
+      "text": "For the Holy Ghost shall teach you in the same hour what ye ought to say.",
+      "highlights": []
+    },
+    {
+      "reference": "John 6:63",
+      "text": "It is the spirit that quickeneth; the flesh profiteth nothing: the words that I speak unto you, they are spirit, and they are life.",
+      "highlights": []
+    },
+    {
+      "reference": "John 16:13",
+      "text": "Howbeit when he, the Spirit of truth, is come, he will guide you into all truth: for he shall not speak of himself; but whatsoever he shall hear, that shall he speak: and he will shew you things to come.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 1:8",
+      "text": "But ye shall receive power, after that the Holy Ghost is come upon you: and ye shall be witnesses unto me both in Jerusalem, and in all Judaea, and in Samaria, and unto the uttermost part of the earth.",
+      "highlights": []
+    }
+  ]
+}
+               ]
+            },
+            {
+  "sectionNumber": "4",
+  "sectionTitle": "CHRISTIAN LIVING",
+  "subsections": [
+    {
+      "subsectionNumber": "4A1",
+      "subsectionTitle": "Because God is holy, we are to be holy.",
+      "verseCount": 8,
+      "totalVerseCount": 181,
+      "verses": [
+        {
+          "reference": "Leviticus 20:26",
+          "text": "And ye shall be holy unto me: for I the Lord am holy, and have severed you from other people, that ye should be mine.",
+          "highlights": []
+        },
+        {
+          "reference": "Psalms 29:2",
+          "text": "Give unto the Lord the glory due unto his name; worship the Lord in the beauty of holiness.",
+          "highlights": []
+        },
+        {
+          "reference": "Isaiah 35:8",
+          "text": "And an highway shall be there, and a way, and it shall be called The way of holiness; the unclean shall not pass over it; but it shall be for those: the wayfaring men, though fools, shall not err therein.",
+          "highlights": []
+        },
+        {
+          "reference": "Matthew 5:8",
+          "text": "Blessed are the pure in heart: for they shall see God.",
+          "highlights": []
+        },
+        {
+          "reference": "2 Corinthians 7:1",
+          "text": "Having therefore these promises, dearly beloved, let us cleanse ourselves from all filthiness of the flesh and spirit, perfecting holiness in the fear of God.",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:22",
+          "text": "That ye put off concerning the former conversation the old man, which is corrupt according to the deceitful lusts;",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:23",
+          "text": "And be renewed in the spirit of your mind;",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:24",
+          "text": "And that ye put on the new man, which after God is created in righteousness and true holiness.",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "4A2",
+      "subsectionTitle": "We are separated for God and from the world.",
+      "verseCount": 19,
+      "totalVerseCount": 200,
+      "verses": [
+        {
+          "reference": "Exodus 23:2",
+          "text": "Thou shalt not follow a multitude to do evil; neither shalt thou speak in a cause to decline after many to wrest judgment:",
+          "highlights": []
+        },
+        {
+          "reference": "Psalms 19:14",
+          "text": "Let the words of my mouth, and the meditation of my heart, be acceptable in thy sight, O Lord, my strength, and my redeemer.",
+          "highlights": []
+        },
+        {
+          "reference": "Psalms 101:3",
+          "text": "I will set no wicked thing before mine eyes: I hate the work of them that turn aside; it shall not cleave to me.",
+          "highlights": []
+        },
+        {
+          "reference": "Proverbs 1:10",
+          "text": "My son, if sinners entice thee, consent thou not.",
+          "highlights": []
+        },
+        {
+          "reference": "Acts 2:40",
+          "text": "And with many other words did he testify and exhort, saying, Save yourselves from this untoward generation.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 12:1",
+          "text": "I beseech you therefore, brethren, by the mercies of God, that ye present your bodies a living sacrifice, holy, acceptable unto God, which is your reasonable service.",
+          "highlights": []
+        },
+        {
+          "reference": "Romans 12:2",
+          "text": "And be not conformed to this world: but be ye transformed by the renewing of your mind, that ye may prove what is that good, and acceptable, and perfect, will of God.",
+          "highlights": []
+        },
+        {
+          "reference": "1 Corinthians 3:16",
+          "text": "Know ye not that ye are the temple of God, and that the Spirit of God dwelleth in you?",
+          "highlights": []
+        },
+        {
+          "reference": "1 Corinthians 3:17",
+          "text": "If any man defile the temple of God, him shall God destroy; for the temple of God is holy, which temple ye are.",
+          "highlights": []
+        },
+        {
+          "reference": "1 Corinthians 6:9",
+          "text": "Know ye not that the unrighteous shall not inherit the kingdom of God? Be not deceived: neither fornicators, nor idolaters, nor adulterers, nor effeminate, nor abusers of themselves with mankind,",
+          "highlights": []
+        },
+        {
+          "reference": "1 Corinthians 6:10",
+          "text": "Nor thieves, nor covetous, nor drunkards, nor revilers, nor extortioners, shall inherit the kingdom of God.",
+          "highlights": []
+        },
+        {
+          "reference": "1 Corinthians 6:11",
+          "text": "And such were some of you: but ye are washed, but ye are sanctified, but ye are justified in the name of the Lord Jesus, and by the Spirit of our God.",
+          "highlights": []
+        },
+        {
+          "reference": "2 Corinthians 6:17",
+          "text": "Wherefore come out from among them, and be ye separate, saith the Lord, and touch not the unclean thing; and I will receive you.",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:29",
+          "text": "Let no corrupt communication proceed out of your mouth, but that which is good to the use of edifying, that it may minister grace unto the hearers.",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:30",
+          "text": "And grieve not the holy Spirit of God, whereby ye are sealed unto the day of redemption.",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:31",
+          "text": "Let all bitterness, and wrath, and anger, and clamour, and evil speaking, be put away from you, with all malice:",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 4:32",
+          "text": "And be ye kind one to another, tenderhearted, forgiving one another, even as God for Christ's sake hath forgiven you.",
+          "highlights": []
+        },
+        {
+          "reference": "Colossians 3:2",
+          "text": "Set your affection on things above, not on things on the earth.",
+          "highlights": []
+        },
+        {
+          "reference": "1 John 2:15",
+          "text": "Love not the world, neither the things that are in the world. If any man love the world, the love of the Father is not in him.",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "4B1",
+      "subsectionTitle": "The fruit of the Spirit is evident in the Spiritfilled life.",
+      "verseCount": 4,
+      "totalVerseCount": 204,
+      "verses": [
+        {
+          "reference": "Galatians 5:22",
+          "text": "But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith,",
+          "highlights": []
+        },
+        {
+          "reference": "Galatians 5:23",
+          "text": "Meekness, temperance: against such there is no law.",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 5:8",
+          "text": "For ye were sometimes darkness, but now are ye light in the Lord: walk as children of light:",
+          "highlights": []
+        },
+        {
+          "reference": "Ephesians 5:9",
+          "text": "(For the fruit of the Spirit is in all goodness and righteousness and truth;)",
+          "highlights": []
+        }
+      ]
+    },
+    {
+      "subsectionNumber": "4B2",
+      "subsectionTitle": "Christian character and attitudes are to be developed.",
+      "verseCount": 5,
+      "totalVerseCount": 209,
+      "verses": [
+        {
+          "reference": "2 Peter 1:5",
+          "text": "And beside this, giving all diligence, add to your faith virtue; and to virtue knowledge;",
+          "highlights": []
+        },
+        {
+          "reference": "2 Peter 1:6",
+          "text": "And to knowledge temperance; and to temperance patience; and to patience godliness;",
+          "highlights": []
+        },
+        {
+          "reference": "2 Peter 1:7",
+          "text": "And to godliness brotherly kindness; and to brotherly kindness charity.",
+          "highlights": []
+        },
+        {
+          "reference": "2 Peter 1:8",
+          "text": "For if these things be in you, and abound, they make you that ye shall neither be barren nor unfruitful in the knowledge of our Lord Jesus Christ.",
+          "highlights": []
+        },
+        {
+          "reference": "2 Peter 1:9",
+          "text": "But he that lacketh these things is blind, and cannot see afar off, and hath forgotten that he was purged from his old sins.",
+          "highlights": []
+        }
+      ]
+    },
+    {
+  "subsectionNumber": "4C1",
+  "subsectionTitle": "We are commanded to worship and praise the Lord.",
+  "verseCount": 8,
+  "totalVerseCount": 217,
+  "verses": [
+    {
+      "reference": "Psalms 47:1",
+      "text": "O clap your hands, all ye people; shout unto God with the voice of triumph.",
+      "highlights": []
+    },
+    {
+      "reference": "Psalms 95:1",
+      "text": "O come, let us sing unto the Lord: let us make a joyful noise to the rock of our salvation.",
+      "highlights": []
+    },
+    {
+      "reference": "Psalms 95:2",
+      "text": "Let us come before his presence with thanksgiving, and make a joyful noise unto him with psalms.",
+      "highlights": []
+    },
+    {
+      "reference": "Psalms 100:4",
+      "text": "Enter into his gates with thanksgiving, and into his courts with praise: be thankful unto him, and bless his name.",
+      "highlights": []
+    },
+    {
+      "reference": "Philippians 2:9",
+      "text": "Wherefore God also hath highly exalted him, and given him a name which is above every name:",
+      "highlights": []
+    },
+    {
+      "reference": "Philippians 2:10",
+      "text": "That at the name of Jesus every knee should bow, of things in heaven, and things in earth, and things under the earth;",
+      "highlights": []
+    },
+    {
+      "reference": "Philippians 2:11",
+      "text": "And that every tongue should confess that Jesus Christ is Lord, to the glory of God the Father.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Peter 2:9",
+      "text": "But ye are a chosen generation, a royal priesthood, an holy nation, a peculiar people; that ye should shew forth the praises of him who hath called you out of darkness into his marvellous light;",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "4C2",
+  "subsectionTitle": "Prayer is a daily essential of our walk with God.",
+  "verseCount": 24,
+  "totalVerseCount": 241,
+  "verses": [
+    {
+      "reference": "1 Chronicles 16:11",
+      "text": "Seek the Lord and his strength, seek his face continually.",
+      "highlights": []
+    },
+    {
+      "reference": "Psalms 91:15",
+      "text": "He shall call upon me, and I will answer him: I will be with him in trouble; I will deliver him, and honour him.",
+      "highlights": []
+    },
+    {
+      "reference": "Jeremiah 29:13",
+      "text": "And ye shall seek me, and find me, when ye shall search for me with all your heart.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:5",
+      "text": "And when thou prayest, thou shalt not be as the hypocrites are: for they love to pray standing in the synagogues and in the corners of the streets, that they may be seen of men. Verily I say unto you, They have their reward.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:6",
+      "text": "But thou, when thou prayest, enter into thy closet, and when thou hast shut thy door, pray to thy Father which is in secret; and thy Father which seeth in secret shall reward thee openly.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:7",
+      "text": "But when ye pray, use not vain repetitions, as the heathen do: for they think that they shall be heard for their much speaking.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:8",
+      "text": "Be not ye therefore like unto them: for your Father knoweth what things ye have need of, before ye ask him.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:9",
+      "text": "After this manner therefore pray ye: Our Father which art in heaven, Hallowed be thy name.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:10",
+      "text": "Thy kingdom come, Thy will be done in earth, as it is in heaven.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:11",
+      "text": "Give us this day our daily bread.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:12",
+      "text": "And forgive us our debts, as we forgive our debtors.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:13",
+      "text": "And lead us not into temptation, but deliver us from evil: For thine is the kingdom, and the power, and the glory, for ever. Amen.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 7:7",
+      "text": "Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you:",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 26:41",
+      "text": "Watch and pray, that ye enter not into temptation: the spirit indeed is willing, but the flesh is weak.",
+      "highlights": []
+    },
+    {
+      "reference": "John 16:24",
+      "text": "Hitherto have ye asked nothing in my name: ask, and ye shall receive, that your joy may be full.",
+      "highlights": []
+    },
+    {
+      "reference": "Philippians 4:6",
+      "text": "Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Thessalonians 5:17",
+      "text": "Pray without ceasing.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Timothy 2:8",
+      "text": "I will therefore that men pray every where, lifting up holy hands, without wrath and doubting.",
+      "highlights": []
+    },
+    {
+      "reference": "James 5:13",
+      "text": "Is any among you afflicted? let him pray. Is any merry? let him sing psalms.",
+      "highlights": []
+    },
+    {
+      "reference": "James 5:14",
+      "text": "Is any sick among you? let him call for the elders of the church; and let them pray over him, anointing him with oil in the name of the Lord:",
+      "highlights": []
+    },
+    {
+      "reference": "James 5:15",
+      "text": "And the prayer of faith shall save the sick, and the Lord shall raise him up; and if he have committed sins, they shall be forgiven him.",
+      "highlights": []
+    },
+    {
+      "reference": "James 5:16",
+      "text": "Confess your faults one to another, and pray one for another, that ye may be healed. The effectual fervent prayer of a righteous man availeth much.",
+      "highlights": []
+    },
+    {
+      "reference": "James 5:17",
+      "text": "Elias was a man subject to like passions as we are, and he prayed earnestly that it might not rain: and it rained not on the earth by the space of three years and six months.",
+      "highlights": []
+    },
+    {
+      "reference": "James 5:18",
+      "text": "And he prayed again, and the heaven gave rain, and the earth brought forth her fruit.",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "4C3",
+  "subsectionTitle": "Fasting is an important practice in our Christian life.",
+  "verseCount": 5,
+  "totalVerseCount": 246,
+  "verses": [
+    {
+      "reference": "Matthew 6:16",
+      "text": "Moreover when ye fast, be not, as the hypocrites, of a sad countenance: for they disfigure their faces, that they may appear unto men to fast. Verily I say unto you, They have their reward.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:17",
+      "text": "But thou, when thou fastest, anoint thine head, and wash thy face;",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 6:18",
+      "text": "That thou appear not unto men to fast, but unto thy Father which is in secret: and thy Father, which seeth in secret, shall reward thee openly.",
+      "highlights": []
+    },
+    {
+      "reference": "Matthew 17:21",
+      "text": "Howbeit this kind goeth not out but by prayer and fasting.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 13:2",
+      "text": "As they ministered to the Lord, and fasted, the Holy Ghost said, Separate me Barnabas and Saul for the work whereunto I have called them.",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "4C4",
+  "subsectionTitle": "Our apparel and adornment should glorify God and reflect Christ in us.",
+  "verseCount": 7,
+  "totalVerseCount": 253,
+  "verses": [
+    {
+      "reference": "Deuteronomy 22:5",
+      "text": "The woman shall not wear that which pertaineth unto a man, neither shall a man put on a woman's garment: for all that do so are abomination unto the Lord thy God.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Corinthians 11:14",
+      "text": "Doth not even nature itself teach you, that, if a man have long hair, it is a shame unto him?",
+      "highlights": []
+    },
+    {
+      "reference": "1 Corinthians 11:15",
+      "text": "But if a woman have long hair, it is a glory to her: for her hair is given her for a covering.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Timothy 2:9",
+      "text": "In like manner also, that women adorn themselves in modest apparel, with shamefacedness and sobriety; not with broided hair, or gold, or pearls, or costly array;",
+      "highlights": []
+    },
+    {
+      "reference": "1 Timothy 2:10",
+      "text": "But (which becometh women professing godliness) with good works.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Peter 3:3",
+      "text": "Whose adorning let it not be that outward adorning of plaiting the hair, and of wearing of gold, or of putting on of apparel;",
+      "highlights": []
+    },
+    {
+      "reference": "1 Peter 3:4",
+      "text": "But let it be the hidden man of the heart, in that which is not corruptible, even the ornament of a meek and quiet spirit, which is in the sight of God of great price.",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "4D1",
+  "subsectionTitle": "Regular church attendance is necessary and spiritually enriching.",
+  "verseCount": 6,
+  "totalVerseCount": 259,
+  "verses": [
+    {
+      "reference": "Psalms 23:6",
+      "text": "Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the Lord for ever.",
+      "highlights": []
+    },
+    {
+      "reference": "Psalms 27:4",
+      "text": "One thing have I desired of the Lord, that will I seek after; that I may dwell in the house of the Lord all the days of my life, to behold the beauty of the Lord, and to enquire in his temple.",
+      "highlights": []
+    },
+    {
+      "reference": "Psalms 122:1",
+      "text": "I was glad when they said unto me, Let us go into the house of the Lord.",
+      "highlights": []
+    },
+    {
+      "reference": "Luke 4:16",
+      "text": "And he came to Nazareth, where he had been brought up: and, as his custom was, he went into the synagogue on the sabbath day, and stood up for to read.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Corinthians 4:2",
+      "text": "Moreover it is required in stewards, that a man be found faithful.",
+      "highlights": []
+    },
+    {
+      "reference": "Hebrews 10:25",
+      "text": "Not forsaking the assembling of ourselves together, as the manner of some is; but exhorting one another: and so much the more, as ye see the day approaching.",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "4D2",
+  "subsectionTitle": "Honor and submission are to be given to Godordained authority.",
+  "verseCount": 4,
+  "totalVerseCount": 263,
+  "verses": [
+    {
+      "reference": "Ephesians 5:21",
+      "text": "Submitting yourselves one to another in the fear of God.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Timothy 5:17",
+      "text": "Let the elders that rule well be counted worthy of double honour, especially they who labour in the word and doctrine.",
+      "highlights": []
+    },
+    {
+      "reference": "Hebrews 13:7",
+      "text": "Remember them which have the rule over you, who have spoken unto you the word of God: whose faith follow, considering the end of their conversation.",
+      "highlights": []
+    },
+    {
+      "reference": "Hebrews 13:17",
+      "text": "Obey them that have the rule over you, and submit yourselves: for they watch for your souls, as they that must give account, that they may do it with joy, and not with grief: for that is unprofitable for you.",
+      "highlights": []
+    }
+  ]
+},
+{
+  "subsectionNumber": "4D3",
+  "subsectionTitle": "Sharing God's goodness in your own life will lead others to the Lord.",
+  "verseCount": 4,
+  "totalVerseCount": 267,
+  "verses": [
+    {
+      "reference": "Exodus 4:12",
+      "text": "Now therefore go, and I will be with thy mouth, and teach thee what thou shalt say.",
+      "highlights": []
+    },
+    {
+      "reference": "Psalms 66:16",
+      "text": "Come and hear, all ye that fear God, and I will declare what he hath done for my soul.",
+      "highlights": []
+    },
+    {
+      "reference": "Acts 4:20",
+      "text": "For we cannot but speak the things which we have seen and heard.",
+      "highlights": []
+    },
+    {
+      "reference": "1 Peter 3:15",
+      "text": "But sanctify the Lord God in your hearts: and be ready always to give an answer to every man that asketh you a reason of the hope that is in you with meekness and fear:",
+      "highlights": []
+    }
+  ]
+}
+ ]
+                }
+]
+
+    };
+
+
+function App() {
+  const [learnedVerses, setLearnedVerses] = React.useState(new Set());
+  const [selectedSections, setSelectedSections] = React.useState(new Set(bibleData.sections?.map(s => s.sectionNumber) || []));
+  const [showOnlyLearned, setShowOnlyLearned] = React.useState(false);
+  const [showOnlyUnlearned, setShowOnlyUnlearned] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [wordFrequency, setWordFrequency] = React.useState({});
+  const [highlightedWords, setHighlightedWords] = React.useState({});
+  const [activeWordFilter, setActiveWordFilter] = React.useState(null);
+  const [selectedSpecificWords, setSelectedSpecificWords] = React.useState(new Set());
+  const [showWordMenu, setShowWordMenu] = React.useState(false);
+  
+  // Charting states
+  const [chartingCategories, setChartingCategories] = React.useState({});
+  const [selectedChartingCategories, setSelectedChartingCategories] = React.useState(new Set());
+  
+  // New division states
+  const [divisions, setDivisions] = React.useState({});
+  const [selectedDivisions, setSelectedDivisions] = React.useState(new Set());
+
+  // Load saved data on component mount
+  React.useEffect(() => {
+    const savedLearned = localStorage.getItem('learnedVerses');
+    const savedSections = localStorage.getItem('selectedSections');
+    
+    if (savedLearned) {
+      setLearnedVerses(new Set(JSON.parse(savedLearned)));
+    }
+    
+    if (savedSections && bibleData.sections) {
+      setSelectedSections(new Set(JSON.parse(savedSections)));
+    } else if (bibleData.sections) {
+      setSelectedSections(new Set(bibleData.sections.map(s => s.sectionNumber)));
+    }
+  }, []);
+
+  // Save learned verses when they change
+  React.useEffect(() => {
+    localStorage.setItem('learnedVerses', JSON.stringify([...learnedVerses]));
+  }, [learnedVerses]);
+
+  // Save selected sections when they change
+  React.useEffect(() => {
+    localStorage.setItem('selectedSections', JSON.stringify([...selectedSections]));
+  }, [selectedSections]);
+
+  // Calculate word frequency and collect highlighted words when bible data is available
+  React.useEffect(() => {
+    if (!bibleData.sections) return;
+
+    const highlighted = { type1: new Set(), type2: new Set(), type3: new Set() };
+    
+    bibleData.sections.forEach(section => {
+      section.subsections.forEach(subsection => {
+        subsection.verses.forEach(verse => {
+          // Collect highlighted words from JSON ONLY
+          if (verse.highlights) {
+            verse.highlights.forEach(highlight => {
+              if (highlight.type === 'type1') highlighted.type1.add(highlight.word.toLowerCase());
+              else if (highlight.type === 'type2') highlighted.type2.add(highlight.word.toLowerCase());
+              else if (highlight.type === 'type3') highlighted.type3.add(highlight.word.toLowerCase());
+            });
+          }
+        });
+      });
+    });
+
+    setHighlightedWords(highlighted);
+  }, []);
+
+  // Updated useEffect to collect charting categories with auto-detection
+  React.useEffect(() => {
+    if (!bibleData.sections) return;
+    const categories = {};
+    bibleData.sections.forEach(section => {
+      section.subsections.forEach(subsection => {
+        subsection.verses.forEach(verse => {
+          // Manual charting types from JSON
+          if (verse.chartingType) {
+            if (!categories[verse.chartingType]) {
+              categories[verse.chartingType] = 0;
+            }
+            categories[verse.chartingType]++;
+          }
+
+          // Auto-detect exclamations
+          if (verse.text.includes('!')) {
+            const exclamationType = 'auto-exclamation';
+            if (!categories[exclamationType]) {
+              categories[exclamationType] = 0;
+            }
+            categories[exclamationType]++;
+          }
+
+          // Auto-detect questions
+          if (verse.text.includes('?')) {
+            const questionType = 'auto-question';
+            if (!categories[questionType]) {
+              categories[questionType] = 0;
+            }
+            categories[questionType]++;
+          }
+
+          // Auto-detect statements from JSON flags
+          if (verse.statementFlags && Array.isArray(verse.statementFlags)) {
+            verse.statementFlags.forEach(flag => {
+              const flagType = `statement-${flag}`;
+              if (!categories[flagType]) {
+                categories[flagType] = 0;
+              }
+              categories[flagType]++;
+            });
+          }
+        });
+      });
+    });
+    setChartingCategories(categories);
+  }, []);
+
+  // New useEffect to collect divisions
+  React.useEffect(() => {
+    if (!bibleData.sections) return;
+
+    const divisionCounts = {};
+    
+    bibleData.sections.forEach(section => {
+      section.subsections.forEach(subsection => {
+        subsection.verses.forEach(verse => {
+          if (verse.divisions && Array.isArray(verse.divisions)) {
+            verse.divisions.forEach(division => {
+              if (!divisionCounts[division]) {
+                divisionCounts[division] = 0;
+              }
+              divisionCounts[division]++;
+            });
+          }
+        });
+      });
+    });
+
+    setDivisions(divisionCounts);
+  }, []);
+
+  const toggleVerseStatus = (reference) => {
+    setLearnedVerses(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reference)) {
+        newSet.delete(reference);
+      } else {
+        newSet.add(reference);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSection = (sectionNumber) => {
+    setSelectedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionNumber)) {
+        newSet.delete(sectionNumber);
+      } else {
+        newSet.add(sectionNumber);
+      }
+      return newSet;
+    });
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
+  const toggleWordFilter = (type) => {
+    if (activeWordFilter === type) {
+      setActiveWordFilter(null);
+      setSelectedSpecificWords(new Set());
+    } else {
+      setActiveWordFilter(type);
+      setSelectedSpecificWords(new Set());
+    }
+    setShowWordMenu(false);
+  };
+
+  const toggleSpecificWord = (word) => {
+    setSelectedSpecificWords(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(word)) {
+        newSet.delete(word);
+      } else {
+        newSet.add(word);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleChartingCategory = (category) => {
+    setSelectedChartingCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
+
+  const clearChartingFilter = () => {
+    setSelectedChartingCategories(new Set());
+  };
+
+  // New division functions
+  const toggleDivision = (division) => {
+    setSelectedDivisions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(division)) {
+        newSet.delete(division);
+      } else {
+        newSet.add(division);
+      }
+      return newSet;
+    });
+  };
+
+  const clearDivisionFilter = () => {
+    setSelectedDivisions(new Set());
+  };
+
+  // Check if a verse matches the word filter criteria
+  const verseMatchesWordFilter = (verse) => {
+    if (!activeWordFilter) return true;
+    
+    const verseText = verse.text.toLowerCase();
+    const verseWords = verseText.replace(/[^\w\s]/g, '').split(/\s+/);
+    
+    // If specific words are selected, check for those
+    if (selectedSpecificWords.size > 0) {
+      return Array.from(selectedSpecificWords).some(word => 
+        verseWords.includes(word.toLowerCase())
+      );
+    }
+    
+    // Otherwise check if verse contains any words of the active type
+    const wordsOfType = highlightedWords[activeWordFilter] || new Set();
+    return verseWords.some(word => wordsOfType.has(word));
+  };
+
+  // Check if a verse matches the charting filter criteria
+  const verseMatchesChartingFilter = (verse) => {
+    if (selectedChartingCategories.size === 0) return true;
+
+    const verseCategories = new Set();
+
+    // Add manual charting type
+    if (verse.chartingType) {
+      verseCategories.add(verse.chartingType);
+    }
+
+    // Add auto-detected exclamation
+    if (verse.text.includes('!')) {
+      verseCategories.add('auto-exclamation');
+    }
+
+    // Add auto-detected questions
+    if (verse.text.includes('?')) {
+      verseCategories.add('auto-question');
+    }
+
+    // Add statement flags
+    if (verse.statementFlags && Array.isArray(verse.statementFlags)) {
+      verse.statementFlags.forEach(flag => {
+        verseCategories.add(`statement-${flag}`);
+      });
+    }
+
+    // Check if any of the verse's categories match selected filters
+    return Array.from(selectedChartingCategories).some(selected => 
+      verseCategories.has(selected)
+    );
+  };
+
+  // Check if a verse matches the division filter criteria
+  const verseMatchesDivisionFilter = (verse) => {
+    if (selectedDivisions.size === 0) return true;
+    if (!verse.divisions || !Array.isArray(verse.divisions)) return false;
+    
+    // Check if verse has ANY of the selected divisions
+    return verse.divisions.some(division => selectedDivisions.has(division));
+  };
+
+  // Filter sections based on all criteria
+  const filteredSections = React.useMemo(() => {
+    if (!bibleData.sections) return [];
+    
+    let sections = bibleData.sections.filter(section => 
+      selectedSections.has(section.sectionNumber)
+    );
+
+    // Apply filters
+    sections = sections.map(section => ({
+      ...section,
+      subsections: section.subsections.map(subsection => ({
+        ...subsection,
+        verses: subsection.verses.filter(verse => {
+          // Search filter
+          const matchesSearch = !searchTerm.trim() || 
+            verse.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            verse.reference.toLowerCase().includes(searchTerm.toLowerCase());
+          
+          // Word filter
+          const matchesWordFilter = verseMatchesWordFilter(verse);
+          
+          // Charting filter
+          const matchesChartingFilter = verseMatchesChartingFilter(verse);
+          
+          // Division filter
+          const matchesDivisionFilter = verseMatchesDivisionFilter(verse);
+          
+          return matchesSearch && matchesWordFilter && matchesChartingFilter && matchesDivisionFilter;
+        })
+      })).filter(subsection => subsection.verses.length > 0)
+    })).filter(section => section.subsections.length > 0);
+
+    return sections;
+  }, [selectedSections, searchTerm, activeWordFilter, selectedSpecificWords, highlightedWords, selectedChartingCategories, selectedDivisions]);
+
+  // Calculate statistics
+  const totalVerses = bibleData.sections?.reduce((total, section) => 
+    total + section.subsections.reduce((subTotal, subsection) => 
+      subTotal + subsection.verses.length, 0), 0) || 0;
+  const learnedCount = learnedVerses.size;
+
+  // Calculate search results count
+  const searchResultsCount = React.useMemo(() => {
+    return filteredSections.reduce((total, section) => 
+      total + section.subsections.reduce((subTotal, subsection) => 
+        subTotal + subsection.verses.length, 0), 0);
+  }, [filteredSections]);
+
+  const getWordsForType = (type) => {
+    return Array.from(highlightedWords[type] || []).sort();
+  };
+
+  return (
+    <div>
+      <h1>Bible Verses</h1>
+      
+      <div className="controls">
+        <div className="word-frequency-legend">
+          <h4>Word Highlighting Legend:</h4>
+          <div className="legend-item">
+            <span className="highlighted type1">Red</span> - Manually specified words (JSON)
+          </div>
+          <div className="legend-item">
+            <span className="highlighted type2">Blue</span> - Words appearing twice
+          </div>
+          <div className="legend-item">
+            <span className="highlighted type3">Green</span> - Words appearing 3+ times
+          </div>
+        </div>
+
+        {/* New Division Filter Controls */}
+        {Object.keys(divisions).length > 0 && (
+          <div className="division-filter-controls">
+            <h4>Filter by Divisions:</h4>
+            <div className="division-toggles">
+              {Object.entries(divisions).map(([division, count]) => (
+                <button 
+                  key={division}
+                  className={`division-toggle ${selectedDivisions.has(division) ? 'active' : ''}`}
+                  onClick={() => toggleDivision(division)}
+                >
+                  {division} ({count})
+                </button>
+              ))}
+            </div>
+            
+            {selectedDivisions.size > 0 && (
+              <div>
+                <button onClick={clearDivisionFilter} className="clear-search">
+                  Clear Division Filter
+                </button>
+                <div className="division-stats">
+                  Active divisions: {Array.from(selectedDivisions).join(', ')}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Charting Filter Controls */}
+        {Object.keys(chartingCategories).length > 0 && (
+          <div className="charting-filter-controls">
+            <h4>Filter by Charting Categories:</h4>
+            <div className="charting-category-toggles">
+              {Object.entries(chartingCategories).map(([category, count]) => (
+                <button 
+                  key={category}
+                  className={`charting-category-toggle ${selectedChartingCategories.has(category) ? 'active' : ''}`}
+                  onClick={() => toggleChartingCategory(category)}
+                >
+                  {category} ({count})
+                </button>
+              ))}
+            </div>
+            
+            {selectedChartingCategories.size > 0 && (
+              <div>
+                <button onClick={clearChartingFilter} className="clear-search">
+                  Clear Charting Filter
+                </button>
+                <div className="charting-stats">
+                  Active filters: {Array.from(selectedChartingCategories).join(', ')}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="word-filter-controls">
+          <h4>Filter by Word Types:</h4>
+          <div className="word-type-toggles">
+            <button 
+              className={`word-type-toggle ${activeWordFilter === 'type1' ? 'active' : ''}`}
+              onClick={() => toggleWordFilter('type1')}
+            >
+              Type 1 Words ({highlightedWords.type1?.size || 0})
+            </button>
+            <button 
+              className={`word-type-toggle ${activeWordFilter === 'type2' ? 'active' : ''}`}
+              onClick={() => toggleWordFilter('type2')}
+            >
+              Type 2 Words ({highlightedWords.type2?.size || 0})
+            </button>
+            <button 
+              className={`word-type-toggle ${activeWordFilter === 'type3' ? 'active' : ''}`}
+              onClick={() => toggleWordFilter('type3')}
+            >
+              Type 3 Words ({highlightedWords.type3?.size || 0})
+            </button>
+          </div>
+          
+          {activeWordFilter && (
+            <div className="word-list-dropdown">
+              <button 
+                className="word-list-button"
+                onClick={() => setShowWordMenu(!showWordMenu)}
+              >
+                Select Specific Words ({selectedSpecificWords.size} selected)
+              </button>
+              
+              {showWordMenu && (
+                <div className="word-list-menu">
+                  {getWordsForType(activeWordFilter).map(word => (
+                    <div
+                      key={word}
+                      className={`word-list-item ${selectedSpecificWords.has(word) ? 'selected' : ''}`}
+                      onClick={() => toggleSpecificWord(word)}
+                    >
+                      {word}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {activeWordFilter && (
+            <div style={{marginTop: '10px', fontSize: '14px', color: '#666'}}>
+              {selectedSpecificWords.size > 0 
+                ? `Filtering by: ${Array.from(selectedSpecificWords).join(', ')}`
+                : `Showing all verses with ${activeWordFilter} words`
+              }
+            </div>
+          )}
+        </div>
+      
+        <div className="filter-controls">
+          <h3>Search:</h3>
+          <input
+            type="text"
+            placeholder="Search verses by text or reference..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-box"
+          />
+          {searchTerm && (
+            <button onClick={clearSearch} className="clear-search">
+              Clear Search
+            </button>
+          )}
+        </div>
+
+        {bibleData.sections && (
+          <div className="filter-controls">
+            <h3>Filter by Sections:</h3>
+            {bibleData.sections.map(section => (
+              <label key={section.sectionNumber}>
+                <input
+                  type="checkbox"
+                  checked={selectedSections.has(section.sectionNumber)}
+                  onChange={() => toggleSection(section.sectionNumber)}
+                />
+                {section.sectionNumber} - {section.sectionTitle}
+              </label>
+            ))}
+          </div>
+        )}
+
+        <div className="filter-controls">
+          <h3>Filter by Learning Status:</h3>
+          <label>
+            <input
+              type="checkbox"
+              checked={showOnlyLearned}
+              onChange={(e) => {
+                setShowOnlyLearned(e.target.checked);
+                if (e.target.checked) setShowOnlyUnlearned(false);
+              }}
+            />
+            Show only learned verses
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showOnlyUnlearned}
+              onChange={(e) => {
+                setShowOnlyUnlearned(e.target.checked);
+                if (e.target.checked) setShowOnlyLearned(false);
+              }}
+            />
+            Show only unlearned verses
+          </label>
+        </div>
+      
+        <div className="stats">
+          <strong>
+            Showing: {searchResultsCount} of {totalVerses} verses | 
+            Progress: {learnedCount} learned ({totalVerses > 0 ? Math.round((learnedCount / totalVerses) * 100) : 0}%)
+            {selectedChartingCategories.size > 0 && (
+              <span> | Charting: {Array.from(selectedChartingCategories).join(', ')}</span>
+            )}
+            {selectedDivisions.size > 0 && (
+              <span> | Divisions: {Array.from(selectedDivisions).join(', ')}</span>
+            )}
+          </strong>
+        </div>
+      </div>
+    
+      <SectionList 
+        sections={filteredSections} 
+        learnedVerses={learnedVerses}
+        toggleVerseStatus={toggleVerseStatus}
+        showOnlyLearned={showOnlyLearned}
+        showOnlyUnlearned={showOnlyUnlearned}
+        searchTerm={searchTerm}
+        wordFrequency={wordFrequency}
+      />
+    </div>
+  );
+}
+    function SectionList({ sections, learnedVerses, toggleVerseStatus, showOnlyLearned, showOnlyUnlearned, searchTerm, wordFrequency }) {
+        return (
+            <ul>
+                {sections.map((section) => (
+                    <li key={section.sectionNumber}>
+                        <strong>{section.sectionNumber} - {section.sectionTitle}</strong>
+                        <SubsectionList 
+                          subsections={section.subsections} 
+                          learnedVerses={learnedVerses}
+                          toggleVerseStatus={toggleVerseStatus}
+                          showOnlyLearned={showOnlyLearned}
+                          showOnlyUnlearned={showOnlyUnlearned}
+                          searchTerm={searchTerm}
+                          wordFrequency={wordFrequency}
+                        />
+                    </li>
+                ))}
+            </ul>
+        );
+    }
+
+    function SubsectionList({ subsections, learnedVerses, toggleVerseStatus, showOnlyLearned, showOnlyUnlearned, searchTerm, wordFrequency }) {
+        return (
+            <ul className="subsection">
+                {subsections.map((subsection) => {
+                    const learnedInSubsection = subsection.verses.filter(verse => 
+                      learnedVerses.has(verse.reference)).length;
+                    
+                    return (
+                        <li key={subsection.subsectionNumber}>
+                            <strong>{subsection.subsectionNumber} - {subsection.subsectionTitle}</strong>
+                            <br />
+                            <em>{subsection.verseCount} verses ({subsection.totalVerseCount}) - {learnedInSubsection} learned</em>
+                            <VerseList 
+                              verses={subsection.verses} 
+                              learnedVerses={learnedVerses}
+                              toggleVerseStatus={toggleVerseStatus}
+                              showOnlyLearned={showOnlyLearned}
+                              showOnlyUnlearned={showOnlyUnlearned}
+                              searchTerm={searchTerm}
+                              wordFrequency={wordFrequency}
+                            />
+                        </li>
+                    );
+                })}
+            </ul>
+        );
+    }
+
+    function VerseList({ verses, learnedVerses, toggleVerseStatus, showOnlyLearned, showOnlyUnlearned, searchTerm, wordFrequency }) {
+        const filteredVerses = verses.filter(verse => {
+            const isLearned = learnedVerses.has(verse.reference);
+            if (showOnlyLearned) return isLearned;
+            if (showOnlyUnlearned) return !isLearned;
+            return true;
+        });
+      
+        return (
+            <ul className="verse-list">
+                {filteredVerses.map((verse, index) => (
+                    <li key={index} className={`verse-item ${learnedVerses.has(verse.reference) ? 'learned' : ''}`}>
+                        <strong>{verse.reference}:</strong> <VerseText verse={verse} searchTerm={searchTerm} wordFrequency={wordFrequency} />
+
+                        {/* Statement and exclamation indicators */}
+                        <div className="verse-statement-flags">
+                            {verse.text.includes('!') && (
+                                <div className="exclamation-indicator">
+                                    Contains Exclamation
+                                </div>
+                            )}
+                            {verse.statementFlags && verse.statementFlags.map(flag => (
+                                <div key={flag} className="statement-indicator">
+                                    Statement: {flag}
+                                </div>
+                            ))}
+                            {verse.chartingType && (
+                                <div className="statement-indicator">
+                                    Category: {verse.chartingType}
+                                </div>
+                            )}
+                        </div>
+
+                        <button 
+                          className={`learned-button ${learnedVerses.has(verse.reference) ? 'learned' : ''}`}
+                          onClick={() => toggleVerseStatus(verse.reference)}
+                        >
+                          {learnedVerses.has(verse.reference) ? 'Mark as Unlearned' : 'Mark as Learned'}
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        );
+    }
+
+    function VerseText({ verse, searchTerm, wordFrequency }) {
+      const text = verse.text;
+      const existingHighlights = verse.highlights || [];
+      
+      // First, handle search highlighting
+      if (searchTerm && searchTerm.trim()) {
+        const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const searchHighlightedParts = text.split(regex);
+        
+        return (
+          <span>
+            {searchHighlightedParts.map((part, index) => {
+              const isSearchMatch = part.toLowerCase() === searchTerm.toLowerCase();
+              if (isSearchMatch) {
+                return <span key={index} className="search-highlight">{part}</span>;
+              }
+              
+              // For non-search parts, apply frequency and existing highlights
+              return <HighlightedTextPart key={index} text={part} existingHighlights={existingHighlights} wordFrequency={wordFrequency} />;
+            })}
+          </span>
+        );
+      }
+
+      // No search term, apply frequency and existing highlighting
+      return <HighlightedTextPart text={text} existingHighlights={existingHighlights} wordFrequency={wordFrequency} />;
+    }
+
+    function HighlightedTextPart({ text, existingHighlights, wordFrequency }) {
+  // Check if text contains "/" for verse beginning highlighting
+  const slashIndex = text.indexOf('/');
+  
+  if (slashIndex !== -1) {
+    // Split text at the "/" but keep the slash with the first part
+    const beforeSlash = text.substring(0, slashIndex + 1); // Include the "/"
+    const afterSlash = text.substring(slashIndex + 1);
+    
+    return (
+      <span>
+        <ProcessWords text={beforeSlash} existingHighlights={existingHighlights} isVerseBeginning={true} />
+        <ProcessWords text={afterSlash} existingHighlights={existingHighlights} isVerseBeginning={false} />
+      </span>
+    );
+  }
+  
+  // No slash, process normally
+  return <ProcessWords text={text} existingHighlights={existingHighlights} isVerseBeginning={false} />;
+}
+
+    function ProcessWords({ text, existingHighlights, isVerseBeginning }) {
+  // Split text into words while preserving spaces and punctuation
+  const words = text.split(/(\s+|[^\w\s]+)/);
+  
+  return (
+    <span className={isVerseBeginning ? 'verse-beginning' : ''}>
+      {words.map((word, index) => {
+        // Check if this word has an existing highlight from JSON data
+        const existingHighlight = existingHighlights.find(h => 
+          text.indexOf(h.word, text.indexOf(word)) === text.indexOf(word)
+        );
+        
+        if (existingHighlight) {
+          // Apply JSON highlight - if it's in verse beginning, it will inherit the underline/bold
+          return <span key={index} className={`highlighted ${existingHighlight.type}`}>{word}</span>;
+        }
+        
+        // Return word without additional highlighting (will inherit verse-beginning if applicable)
+        return word;
+      })}
+    </span>
+  );
+}
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
