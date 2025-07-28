@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bible Verses Study App</title>
     <style>
         * {
@@ -675,7 +675,6 @@
 .verse-popup-item:last-child {
     margin-bottom: 0;
 }
-
 /* Definition popup styles */
 .definition-word {
     position: relative;
@@ -702,6 +701,7 @@
     pointer-events: none;
     margin-bottom: 5px;
     max-width: min(300px, 80vw);
+    min-width: 120px;
 }
 
 .definition-popup::after {
@@ -781,16 +781,19 @@
     }
 }
 
-/* Enhanced mobile touch styles */
-@media (hover: none) {
-    .refs-text, .definition-word {
-        -webkit-tap-highlight-color: rgba(33, 150, 243, 0.3);
-        tap-highlight-color: rgba(33, 150, 243, 0.3);
+/* Prevent zoom on input focus for mobile */
+@media screen and (max-width: 768px) {
+    input[type="text"], 
+    input[type="search"], 
+    textarea, 
+    select {
+        font-size: 16px !important;
+        transform-origin: left top;
     }
     
-    .refs-text:active, .definition-word:active {
-        background-color: rgba(33, 150, 243, 0.1);
-        border-radius: 3px;
+    .search-box,
+    #newCategoryInput {
+        font-size: 16px !important;
     }
 }
 
@@ -810,31 +813,56 @@
         margin-bottom: 12px;
     }
     
-    /* Fix definition popups positioning on mobile */
+    /* Smart definition popups positioning on mobile */
     .definition-popup {
         position: absolute;
         bottom: 100%;
-        left: 0;
-        transform: none;
-        max-width: 80vw;
-        min-width: 200px;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 85vw;
+        min-width: 150px;
         white-space: normal;
-        text-align: left;
+        text-align: center;
         padding: 12px 16px;
         font-size: 14px;
         line-height: 1.4;
         margin-bottom: 8px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
-    /* If definition popup would go off right edge, align to right */
-    .definition-word {
-        position: relative;
+    /* Arrow positioning for definition popups */
+    .definition-popup::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: #333;
     }
     
-    .definition-word .definition-popup {
-        /* Check if we're in the right half of screen */
-        left: auto;
+    /* Left-aligned definition popup */
+    .definition-popup.align-left {
+        left: 0;
+        transform: none;
+    }
+    
+    .definition-popup.align-left::after {
+        left: 20px;
+        transform: none;
+    }
+    
+    /* Right-aligned definition popup */
+    .definition-popup.align-right {
         right: 0;
+        left: auto;
+        transform: none;
+    }
+    
+    .definition-popup.align-right::after {
+        right: 20px;
+        left: auto;
         transform: none;
     }
     
@@ -847,15 +875,15 @@
         align-items: center;
     }
     
-    /* Ensure popups don't go off screen edges */
+    /* Ensure verse popups don't go off screen edges */
     .verse-popup {
         max-width: calc(100vw - 20px);
     }
     
     /* Smart positioning for verse popups on edges */
     .verse-popup {
-        left: max(10px, min(50%, calc(100vw - 300px)));
-        transform: translateX(min(-50%, 0px));
+        left: max(10px, min(50%, calc(100vw - 150px)));
+        transform: translateX(min(-50%, -10px));
     }
 }
 
@@ -873,13 +901,10 @@
     }
     
     .definition-popup {
-        min-width: 150px;
-        max-width: 85vw;
+        min-width: 120px;
+        max-width: 90vw;
         font-size: 13px;
         padding: 10px 14px;
-        /* Force to left edge on small screens */
-        left: 0;
-        right: auto;
     }
     
     /* Smaller close button on small screens */
@@ -901,21 +926,17 @@
     
     .definition-popup {
         max-width: 60vw;
-        min-width: 250px;
-        left: 0;
-        transform: none;
+        min-width: 200px;
     }
 }
 
 /* Extra safety for very wide definition popups */
 @media (max-width: 768px) {
     .definition-popup {
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        hyphens: auto;
         box-sizing: border-box;
     }
 }
+
     </style>
 </head>
 <body>
@@ -4811,33 +4832,46 @@ function toggleVerseStatus(reference) {
         }
         
         // mobile support functions 
-        function positionDefinitionPopup(definitionElement) {
-            if (window.innerWidth <= 768) {
-                const popup = definitionElement.querySelector('.definition-popup');
-                if (popup) {
-                    // Get the trigger element's position
-                    const triggerRect = definitionElement.getBoundingClientRect();
-                    const viewportWidth = window.innerWidth;
-
-                    // Reset positioning
-                    popup.style.left = '';
-                    popup.style.right = '';
-                    popup.style.transform = '';
-
-                    // Get popup width after reset
-                    const popupWidth = popup.offsetWidth;
-
-                    // If popup would go off the right edge, align to right
-                    if (triggerRect.left + popupWidth > viewportWidth - 10) {
-                        popup.style.left = 'auto';
-                        popup.style.right = '0';
-                    } else {
-                        popup.style.left = '0';
-                        popup.style.right = 'auto';
-                    }
-                }
+function positionDefinitionPopup(definitionElement) {
+    if (window.innerWidth <= 768) {
+        const popup = definitionElement.querySelector('.definition-popup');
+        if (popup) {
+            // Get the trigger element's position
+            const triggerRect = definitionElement.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            
+            // Reset classes
+            popup.classList.remove('align-left', 'align-right');
+            
+            // Calculate popup width (estimate based on content)
+            const tempDiv = popup.cloneNode(true);
+            tempDiv.style.visibility = 'hidden';
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.top = '-9999px';
+            tempDiv.style.opacity = '1';
+            tempDiv.style.pointerEvents = 'auto';
+            document.body.appendChild(tempDiv);
+            const popupWidth = tempDiv.offsetWidth;
+            document.body.removeChild(tempDiv);
+            
+            // Calculate center position
+            const centerPos = triggerRect.left + (triggerRect.width / 2);
+            const popupLeft = centerPos - (popupWidth / 2);
+            const popupRight = centerPos + (popupWidth / 2);
+            
+            // Check if popup would go off screen
+            if (popupLeft < 10) {
+                // Too far left, align to left edge
+                popup.classList.add('align-left');
+            } else if (popupRight > viewportWidth - 10) {
+                // Too far right, align to right edge  
+                popup.classList.add('align-right');
             }
+            // Otherwise keep centered (default)
         }
+    }
+}
+
         function positionPopupSafely(popupElement) {
             if (window.innerWidth <= 768) {
                 const popup = popupElement.querySelector('.verse-popup, .definition-popup');
@@ -4868,60 +4902,60 @@ function toggleVerseStatus(reference) {
             }
         }
 
-        function addTapSupport() {
-            document.addEventListener('click', function(e) {
-                // Close all popups first
-                const clickedPopupElement = e.target.closest('.refs-text, .definition-word');
+function addTapSupport() {
+    document.addEventListener('click', function(e) {
+        // Close all popups first
+        const clickedPopupElement = e.target.closest('.refs-text, .definition-word');
+        
+        if (clickedPopupElement) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Check if this popup is already active
+            const isCurrentlyActive = clickedPopupElement.classList.contains('active');
+            
+            // Close all popups
+            closeAllPopups();
+            
+            // If it wasn't active, open it
+            if (!isCurrentlyActive) {
+                clickedPopupElement.classList.add('active');
                 
-                if (clickedPopupElement) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // Check if this popup is already active
-                    const isCurrentlyActive = clickedPopupElement.classList.contains('active');
-                    
-                    // Close all popups
-                    closeAllPopups();
-                    
-                    // If it wasn't active, open it
-                    if (!isCurrentlyActive) {
-                        clickedPopupElement.classList.add('active');
-                        
-                        // Add close button
-                        const popup = clickedPopupElement.querySelector('.verse-popup, .definition-popup');
-                        if (popup && !popup.querySelector('.popup-close')) {
-                            const closeBtn = document.createElement('button');
-                            closeBtn.className = 'popup-close';
-                            closeBtn.innerHTML = '×';
-                            closeBtn.onclick = (event) => {
-                                event.stopPropagation();
-                                closeAllPopups();
-                            };
-                            popup.appendChild(closeBtn);
-                        }
-                        
-                        // Position definition popups safely on mobile
-                        if (clickedPopupElement.classList.contains('definition-word')) {
-                            setTimeout(() => positionDefinitionPopup(clickedPopupElement), 10);
-                        }
-                    }
-                } else if (!e.target.closest('.verse-popup, .definition-popup')) {
-                    // Click outside any popup or popup trigger - close all
-                    closeAllPopups();
+                // Add close button
+                const popup = clickedPopupElement.querySelector('.verse-popup, .definition-popup');
+                if (popup && !popup.querySelector('.popup-close')) {
+                    const closeBtn = document.createElement('button');
+                    closeBtn.className = 'popup-close';
+                    closeBtn.innerHTML = '×';
+                    closeBtn.onclick = (event) => {
+                        event.stopPropagation();
+                        closeAllPopups();
+                    };
+                    popup.appendChild(closeBtn);
                 }
-            });
-            
-            // Close popups on scroll
-            document.addEventListener('scroll', closeAllPopups);
-            
-            // Prevent default touch behavior on popup elements to ensure clicks work
-            document.addEventListener('touchstart', function(e) {
-                const target = e.target.closest('.refs-text, .definition-word');
-                if (target) {
-                    e.preventDefault();
+                
+                // Position definition popups safely on mobile
+                if (clickedPopupElement.classList.contains('definition-word')) {
+                    setTimeout(() => positionDefinitionPopup(clickedPopupElement), 10);
                 }
-            });
+            }
+        } else if (!e.target.closest('.verse-popup, .definition-popup')) {
+            // Click outside any popup or popup trigger - close all
+            closeAllPopups();
         }
+    });
+    
+    // Close popups on scroll
+    document.addEventListener('scroll', closeAllPopups);
+    
+    // Prevent default touch behavior on popup elements to ensure clicks work
+    document.addEventListener('touchstart', function(e) {
+        const target = e.target.closest('.refs-text, .definition-word');
+        if (target) {
+            e.preventDefault();
+        }
+    });
+}
         function initMobileSupport() {
             // Detect if device supports hover
             const hasHover = window.matchMedia('(hover: hover)').matches;
