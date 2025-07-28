@@ -681,6 +681,57 @@
 
         .verse-popup-item:last-child {
             margin-bottom: 0;
+        }
+
+        /* Definition popup styles */
+        .definition-word {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #666;
+            text-decoration: none;
+        }
+
+        .definition-word:hover {
+            border-bottom-color: #2196f3;
+        }
+
+        .definition-popup {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            pointer-events: none;
+            margin-bottom: 5px;
+        }
+
+        .definition-word:hover .definition-popup {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .definition-popup::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #333;
+        }
+
+        /* Make definition popups work inside verse popups too */
+        .verse-popup .definition-popup {
+            z-index: 2001;
         }        
     </style>
 </head>
@@ -1819,6 +1870,18 @@
               "text": "And the Lord said unto Moses, Come up to me into the mount, and be there: and I will give thee tables of stone, and a law, and commandments which I have written; that thou mayest teach them.",
               "highlights": [
                 { "word": "Moses", "type": "proper" }
+              ],
+              "hoverDefinitions": [
+                  { 
+                      "word": "I", 
+                      "definition": "referring to God",
+                      "position": "all"
+                  },
+                  { 
+                      "word": "them", 
+                      "definition": "referring to Israel",
+                      "position": "all"
+                  }
               ],
               //"chartingType": "cross-reference",
               "divisions": ["Beginner", "JR"]
@@ -4095,29 +4158,30 @@
             });
         }
 
-        function renderVerseText(verse) {
-            const text = verse.text;
-            const existingHighlights = verse.highlights || [];
-            const uniqueSplitIdx = state.verseSplitMap[verse.reference] || 0;
-            
-            if (state.searchTerm && state.searchTerm.trim()) {
-                const regex = new RegExp(`(${state.searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                const parts = text.split(regex);
-                
-                return parts.map(part => {
-                    if (part.toLowerCase() === state.searchTerm.toLowerCase()) {
-                        return `<span class="search-highlight">${part}</span>`;
-                    } else {
-                        return processWords(part, existingHighlights, verse.reference, uniqueSplitIdx);
-                    }
-                }).join('');
+function renderVerseText(verse) {
+    const text = verse.text;
+    const existingHighlights = verse.highlights || [];
+    const hoverDefinitions = verse.hoverDefinitions || [];
+    const uniqueSplitIdx = state.verseSplitMap[verse.reference] || 0;
+    
+    if (state.searchTerm && state.searchTerm.trim()) {
+        const regex = new RegExp(`(${state.searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const parts = text.split(regex);
+        
+        return parts.map(part => {
+            if (part.toLowerCase() === state.searchTerm.toLowerCase()) {
+                return `<span class="search-highlight">${part}</span>`;
+            } else {
+                return processWords(part, existingHighlights, verse.reference, uniqueSplitIdx, hoverDefinitions);
             }
-            
-            return processWords(text, existingHighlights, verse.reference, uniqueSplitIdx);
-        }
+        }).join('');
+    }
+    
+    return processWords(text, existingHighlights, verse.reference, uniqueSplitIdx, hoverDefinitions);
+}
 
 // Helper function to format text for popups (without creating nested popups)
-function formatTextForPopup(text, highlights, verseRef, uniqueSplitIdx) {
+function formatTextForPopup(text, highlights, verseRef, uniqueSplitIdx, hoverDefinitions = []) {
     const words = text.split(/(\s+|[^\w\s]+)/);
     let realWordIdx = 0;
     let result = '';
@@ -4134,6 +4198,35 @@ function formatTextForPopup(text, highlights, verseRef, uniqueSplitIdx) {
         
         const stat = state.wordStats[lowerWord];
         
+        // Check for hover definitions
+        const hoverDef = hoverDefinitions.find(def => {
+            if (def.word.toLowerCase() === lowerWord) {
+                if (def.position === 'all') return true;
+                if (def.position === 'first') {
+                    // Check if this is the first occurrence of this word
+                    const previousOccurrences = words.slice(0, idx).filter(w => 
+                        w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase() === lowerWord
+                    ).length;
+                    return previousOccurrences === 0;
+                }
+                if (def.position === 'last') {
+                    // Check if this is the last occurrence of this word
+                    const futureOccurrences = words.slice(idx + 1).filter(w => 
+                        w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase() === lowerWord
+                    ).length;
+                    return futureOccurrences === 0;
+                }
+                if (typeof def.position === 'number') {
+                    // Check if this is the nth occurrence (1-based)
+                    const previousOccurrences = words.slice(0, idx).filter(w => 
+                        w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase() === lowerWord
+                    ).length;
+                    return previousOccurrences === def.position - 1;
+                }
+            }
+            return false;
+        });
+        
         if (isWord && realWordIdx < uniqueSplitIdx) {
             styles.push('verse-beginning');
         }
@@ -4150,8 +4243,18 @@ function formatTextForPopup(text, highlights, verseRef, uniqueSplitIdx) {
             if (highlight.type === 'location') styles.push('location');
         }
         
-        if (styles.length > 0) {
-            result += `<span class="${styles.join(' ')}">${word}</span>`;
+        // Add definition word class if there's a hover definition
+        if (hoverDef) {
+            styles.push('definition-word');
+        }
+        
+        if (styles.length > 0 || hoverDef) {
+            let wordHtml = `<span class="${styles.join(' ')}">${word}`;
+            if (hoverDef) {
+                wordHtml += `<span class="definition-popup">${hoverDef.definition}</span>`;
+            }
+            wordHtml += '</span>';
+            result += wordHtml;
         } else {
             result += word;
         }
@@ -4165,8 +4268,7 @@ function formatTextForPopup(text, highlights, verseRef, uniqueSplitIdx) {
     
     return result;
 }
-
-function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
+function processWords(text, existingHighlights, verseRef, uniqueSplitIdx, hoverDefinitions = []) {
     const words = text.split(/(\s+|[^\w\s]+)/);
     let realWordIdx = 0;
     let result = '';
@@ -4179,6 +4281,22 @@ function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
             h.word && h.word.toLowerCase() === lowerWord
         );
         const stat = state.wordStats[lowerWord];
+        
+        // Check for hover definitions (same logic as in formatTextForPopup)
+        const hoverDef = hoverDefinitions.find(def => {
+            if (def.word.toLowerCase() === lowerWord) {
+                if (def.position === 'all') return true;
+                if (def.position === 'first') {
+                    const previousOccurrences = words.slice(0, idx).filter(w => 
+                        w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase() === lowerWord
+                    ).length;
+                    return previousOccurrences === 0;
+                }
+                // Add other position logic as needed
+            }
+            return false;
+        });
+        
         if (isWord && realWordIdx < uniqueSplitIdx) {
             styles.push('verse-beginning');
         }
@@ -4194,11 +4312,22 @@ function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
             if (highlight.type === 'animal') styles.push('animal');
             if (highlight.type === 'location') styles.push('location');
         }
-        if (styles.length > 0) {
-            result += `<span class="${styles.join(' ')}">${word}</span>`;
+        
+        if (hoverDef) {
+            styles.push('definition-word');
+        }
+        
+        if (styles.length > 0 || hoverDef) {
+            let wordHtml = `<span class="${styles.join(' ')}">${word}`;
+            if (hoverDef) {
+                wordHtml += `<span class="definition-popup">${hoverDef.definition}</span>`;
+            }
+            wordHtml += '</span>';
+            result += wordHtml;
         } else {
             result += word;
         }
+        
         // Add hoverable references for 2x and 3x words
         if (stat && (stat.count === 2 || stat.count === 3) && word.trim().length > 0) {
             const otherRefs = stat.refs.filter(ref => ref !== verseRef);
@@ -4206,12 +4335,10 @@ function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
                 w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase() === lowerWord
             ).length;
             if (previous === 0 && otherRefs.length > 0) {
-                // Create a unique ID for this reference popup
                 const popupId = `popup-${verseRef.replace(/[^a-zA-Z0-9]/g, '')}-${lowerWord}-${idx}`;
                 result += `<span class="refs-text" id="${popupId}">`;
                 result += `(${otherRefs.join(', ')})`;
                 
-                // Add the popup content with formatting
                 result += '<div class="verse-popup">';
                 otherRefs.forEach((ref, refIndex) => {
                     const verse = findVerseByReference(ref);
@@ -4220,13 +4347,13 @@ function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
                         result += `<div class="verse-popup-ref">${verse.reference}</div>`;
                         result += '<div class="verse-popup-text">';
                         
-                        // Format the popup text with the same styling as main verses
                         const popupUniqueIdx = state.verseSplitMap[verse.reference] || 0;
                         const formattedPopupText = formatTextForPopup(
                             verse.text, 
                             verse.highlights || [], 
                             verse.reference, 
-                            popupUniqueIdx
+                            popupUniqueIdx,
+                            verse.hoverDefinitions || []
                         );
                         result += formattedPopupText;
                         
@@ -4244,8 +4371,10 @@ function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
         if (isWord) realWordIdx++;
     });
     return result;
-}
-        function toggleVerseStatus(reference) {
+}     
+
+
+function toggleVerseStatus(reference) {
             if (state.learnedVerses.has(reference)) {
                 state.learnedVerses.delete(reference);
             } else {
