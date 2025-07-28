@@ -612,6 +612,76 @@
             border-radius: 4px;
             border: 1px dashed #ddd;
         }
+
+        /* Verse reference hover styles */
+        .refs-text {
+            font-size: 11px;
+            color: #888;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .refs-text:hover {
+            color: #2196f3;
+        }
+
+        .verse-popup {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 600px;
+            max-width: 900px; /* Even wider maximum */
+            width: max-content; /* Adjust to content width */
+            white-space: normal;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            pointer-events: none;
+        }
+
+        .refs-text:hover .verse-popup {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .verse-popup::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2196f3;
+        }
+
+        .verse-popup-ref {
+            font-weight: bold;
+            color: #2196f3;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .verse-popup-text {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        /* Handle multiple references in popup */
+        .verse-popup-item {
+            margin-bottom: 10px;
+        }
+
+        .verse-popup-item:last-child {
+            margin-bottom: 0;
+        }        
     </style>
 </head>
 <body>
@@ -1811,7 +1881,9 @@
             {
               "reference": "Exodus 34:27",
               "text": "And the Lord said unto Moses, Write thou these words: for after the tenor of these words I have made a covenant with thee and with Israel.",
-              "highlights": []
+              "highlights": [
+                { "word": "Moses", "type": "proper" }
+              ],
             },
             {
               "reference": "Isaiah 30:8",
@@ -3534,12 +3606,12 @@
                                 });
                             }
                             if (verse.text.includes('!')) {
-                                if (!categories['auto-exclamation']) categories['auto-exclamation'] = 0;
-                                categories['auto-exclamation']++;
+                                if (!categories['exclamation']) categories['exclamation'] = 0;
+                                categories['exclamation']++;
                             }
                             if (verse.text.includes('?')) {
-                                if (!categories['auto-question']) categories['auto-question'] = 0;
-                                categories['auto-question']++;
+                                if (!categories['question']) categories['question'] = 0;
+                                categories['question']++;
                             }
                             if (verse.statementFlags && Array.isArray(verse.statementFlags)) {
                                 verse.statementFlags.forEach(flag => {
@@ -4044,71 +4116,135 @@
             return processWords(text, existingHighlights, verse.reference, uniqueSplitIdx);
         }
 
-        function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
-            const words = text.split(/(\s+|[^\w\s]+)/);
-            let realWordIdx = 0;
-            let result = '';
-
-            words.forEach((word, idx) => {
-                const isWord = /[a-zA-Z0-9]/.test(word);
-                let styles = [];
-                const rawWord = word.replace(/[^a-zA-Z0-9'-]/g, '');
-                const lowerWord = rawWord.toLowerCase();
-
-                const highlight = existingHighlights.find(h => 
-                    h.word && h.word.toLowerCase() === lowerWord
-                );
-
-                const stat = state.wordStats[lowerWord];
-
-                if (isWord && realWordIdx < uniqueSplitIdx) {
-                    styles.push('verse-beginning');
-                }
-
-                // Apply word frequency colors first (as base colors)
-                if (stat) {
-                    if (stat.count === 1) styles.push('type1');
-                    if (stat.count === 2) styles.push('type2');
-                    if (stat.count === 3) styles.push('type3');
-                }
-
-                // Apply highlight styles on top (these will override background/text as needed)
-                if (highlight) {
-                    if (highlight.type === 'proper') styles.push('proper-name');
-                    if (highlight.type === 'animal') styles.push('animal');
-                    if (highlight.type === 'location') styles.push('location');
-                }
-
-                let refsText = '';
-                if (stat && (stat.count === 2 || stat.count === 3) && word.trim().length > 0) {
-                    const otherRefs = stat.refs.filter(ref => ref !== verseRef);
-                    const previous = words.slice(0, idx).filter(w => 
-                        w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase() === lowerWord
-                    ).length;
-
-                    if (previous === 0 && otherRefs.length > 0) {
-                        refsText = `<span class="refs-text">(${otherRefs.join(', ')})</span>`;
-                    }
-                }
-
-                if (styles.length > 0) {
-                    result += `<span class="${styles.join(' ')}">${word}</span>`;
-                } else {
-                    result += word;
-                }
-
-                result += refsText;
-
-                if (isWord && realWordIdx === uniqueSplitIdx - 1) {
-                    result += '<strong>/</strong>';
-                }
-
-                if (isWord) realWordIdx++;
-            });
-
-            return result;
+// Helper function to format text for popups (without creating nested popups)
+function formatTextForPopup(text, highlights, verseRef, uniqueSplitIdx) {
+    const words = text.split(/(\s+|[^\w\s]+)/);
+    let realWordIdx = 0;
+    let result = '';
+    
+    words.forEach((word, idx) => {
+        const isWord = /[a-zA-Z0-9]/.test(word);
+        let styles = [];
+        const rawWord = word.replace(/[^a-zA-Z0-9'-]/g, '');
+        const lowerWord = rawWord.toLowerCase();
+        
+        const highlight = highlights.find(h => 
+            h.word && h.word.toLowerCase() === lowerWord
+        );
+        
+        const stat = state.wordStats[lowerWord];
+        
+        if (isWord && realWordIdx < uniqueSplitIdx) {
+            styles.push('verse-beginning');
         }
         
+        if (stat) {
+            if (stat.count === 1) styles.push('type1');
+            if (stat.count === 2) styles.push('type2');
+            if (stat.count === 3) styles.push('type3');
+        }
+        
+        if (highlight) {
+            if (highlight.type === 'proper') styles.push('proper-name');
+            if (highlight.type === 'animal') styles.push('animal');
+            if (highlight.type === 'location') styles.push('location');
+        }
+        
+        if (styles.length > 0) {
+            result += `<span class="${styles.join(' ')}">${word}</span>`;
+        } else {
+            result += word;
+        }
+        
+        if (isWord && realWordIdx === uniqueSplitIdx - 1) {
+            result += '<strong>/</strong>';
+        }
+        
+        if (isWord) realWordIdx++;
+    });
+    
+    return result;
+}
+
+function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
+    const words = text.split(/(\s+|[^\w\s]+)/);
+    let realWordIdx = 0;
+    let result = '';
+    words.forEach((word, idx) => {
+        const isWord = /[a-zA-Z0-9]/.test(word);
+        let styles = [];
+        const rawWord = word.replace(/[^a-zA-Z0-9'-]/g, '');
+        const lowerWord = rawWord.toLowerCase();
+        const highlight = existingHighlights.find(h => 
+            h.word && h.word.toLowerCase() === lowerWord
+        );
+        const stat = state.wordStats[lowerWord];
+        if (isWord && realWordIdx < uniqueSplitIdx) {
+            styles.push('verse-beginning');
+        }
+        // Apply word frequency colors first (as base colors)
+        if (stat) {
+            if (stat.count === 1) styles.push('type1');
+            if (stat.count === 2) styles.push('type2');
+            if (stat.count === 3) styles.push('type3');
+        }
+        // Apply highlight styles on top (these will override background/text as needed)
+        if (highlight) {
+            if (highlight.type === 'proper') styles.push('proper-name');
+            if (highlight.type === 'animal') styles.push('animal');
+            if (highlight.type === 'location') styles.push('location');
+        }
+        if (styles.length > 0) {
+            result += `<span class="${styles.join(' ')}">${word}</span>`;
+        } else {
+            result += word;
+        }
+        // Add hoverable references for 2x and 3x words
+        if (stat && (stat.count === 2 || stat.count === 3) && word.trim().length > 0) {
+            const otherRefs = stat.refs.filter(ref => ref !== verseRef);
+            const previous = words.slice(0, idx).filter(w => 
+                w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase() === lowerWord
+            ).length;
+            if (previous === 0 && otherRefs.length > 0) {
+                // Create a unique ID for this reference popup
+                const popupId = `popup-${verseRef.replace(/[^a-zA-Z0-9]/g, '')}-${lowerWord}-${idx}`;
+                result += `<span class="refs-text" id="${popupId}">`;
+                result += `(${otherRefs.join(', ')})`;
+                
+                // Add the popup content with formatting
+                result += '<div class="verse-popup">';
+                otherRefs.forEach((ref, refIndex) => {
+                    const verse = findVerseByReference(ref);
+                    if (verse) {
+                        result += '<div class="verse-popup-item">';
+                        result += `<div class="verse-popup-ref">${verse.reference}</div>`;
+                        result += '<div class="verse-popup-text">';
+                        
+                        // Format the popup text with the same styling as main verses
+                        const popupUniqueIdx = state.verseSplitMap[verse.reference] || 0;
+                        const formattedPopupText = formatTextForPopup(
+                            verse.text, 
+                            verse.highlights || [], 
+                            verse.reference, 
+                            popupUniqueIdx
+                        );
+                        result += formattedPopupText;
+                        
+                        result += '</div>';
+                        result += '</div>';
+                    }
+                });
+                result += '</div>';
+                result += '</span>';
+            }
+        }
+        if (isWord && realWordIdx === uniqueSplitIdx - 1) {
+            result += '<strong>/</strong>';
+        }
+        if (isWord) realWordIdx++;
+    });
+    return result;
+}
         function toggleVerseStatus(reference) {
             if (state.learnedVerses.has(reference)) {
                 state.learnedVerses.delete(reference);
@@ -4162,6 +4298,49 @@
             document.getElementById('filterDrawer').classList.remove('open');
         }
         
+        // verse reference lookup functions
+        function findVerseByReference(reference) {
+            const currentData = dataSets[state.selectedDataSet];
+            if (!currentData.sections) return null;
+
+            for (const section of currentData.sections) {
+                for (const subsection of section.subsections) {
+                    for (const verse of subsection.verses) {
+                        if (verse.reference === reference) {
+                            return verse;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        function createVersePopup(references) {
+            const popup = document.createElement('div');
+            popup.className = 'verse-popup';
+
+            references.forEach((ref, index) => {
+                const verse = findVerseByReference(ref);
+                if (verse) {
+                    const item = document.createElement('div');
+                    item.className = 'verse-popup-item';
+
+                    const refDiv = document.createElement('div');
+                    refDiv.className = 'verse-popup-ref';
+                    refDiv.textContent = verse.reference;
+
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'verse-popup-text';
+                    textDiv.textContent = verse.text;
+
+                    item.appendChild(refDiv);
+                    item.appendChild(textDiv);
+                    popup.appendChild(item);
+                }
+            });
+
+            return popup;
+        }
         // Category Functions
         
         function openCategoryEditor(verseReference) {
