@@ -613,15 +613,16 @@
             border: 1px dashed #ddd;
         }
 
-        /* Verse reference hover styles */
-        .refs-text {
+        /* Verse hover styles */
+/* Verse reference styles */
+.refs-text {
     font-size: 11px;
     color: #888;
     position: relative;
     cursor: pointer;
-        }
+}
 
-        .verse-popup {
+.verse-popup {
     position: absolute;
     bottom: 100%;
     left: 50%;
@@ -640,9 +641,10 @@
     visibility: hidden;
     transition: opacity 0.2s, visibility 0.2s;
     pointer-events: none;
-        }
+    margin-bottom: 8px;
+}
 
-        .verse-popup::after {
+.verse-popup::after {
     content: '';
     position: absolute;
     top: 100%;
@@ -650,39 +652,39 @@
     transform: translateX(-50%);
     border: 6px solid transparent;
     border-top-color: #2196f3;
-        }
+}
 
-        .verse-popup-ref {
+.verse-popup-ref {
     font-weight: bold;
     color: #2196f3;
     margin-bottom: 5px;
     font-size: 12px;
-        }
+}
 
-        .verse-popup-text {
+.verse-popup-text {
     font-size: 13px;
     line-height: 1.4;
     color: #333;
-        }
+}
 
-        /* Handle multiple references in popup */
-        .verse-popup-item {
+/* Handle multiple references in popup */
+.verse-popup-item {
     margin-bottom: 10px;
-        }
+}
 
-        .verse-popup-item:last-child {
+.verse-popup-item:last-child {
     margin-bottom: 0;
-        }
+}
 
-        /* Definition popup styles */
-        .definition-word {
+/* Definition popup styles */
+.definition-word {
     position: relative;
     cursor: pointer;
     border-bottom: 1px dotted #666;
     text-decoration: none;
-        }
+}
 
-        .definition-popup {
+.definition-popup {
     position: absolute;
     bottom: 100%;
     left: 50%;
@@ -700,32 +702,32 @@
     pointer-events: none;
     margin-bottom: 5px;
     max-width: min(300px, 80vw);
-        }
+}
 
-        .definition-popup::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: #333;
-        }
+.definition-popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+}
 
-        /* Make definition popups work inside verse popups too */
-        .verse-popup .definition-popup {
+/* Make definition popups work inside verse popups too */
+.verse-popup .definition-popup {
     z-index: 2001;
-        }
+}
 
-        /* Active state classes for mobile */
-        .refs-text.active .verse-popup,
+/* Active state classes for mobile */
+.refs-text.active .verse-popup,
 .definition-word.active .definition-popup {
     opacity: 1;
     visibility: visible;
-            pointer-events: auto;
-        }
+    pointer-events: auto;
+}
 
-        /* Close button for mobile popups */
+/* Close button for mobile popups */
 .popup-close {
     position: absolute;
     top: 5px;
@@ -741,14 +743,14 @@
     height: 20px;
     display: flex;
     align-items: center;
-            justify-content: center;
+    justify-content: center;
 }
 
 .definition-popup .popup-close {
-            color: white;
-        }
+    color: white;
+}
 
-        /* Keep hover for desktop */
+/* Keep hover for desktop */
 @media (hover: hover) {
     .refs-text:hover {
         color: #2196f3;
@@ -762,67 +764,130 @@
     .definition-word:hover .definition-popup {
         opacity: 1;
         visibility: visible;
-                pointer-events: auto;
-            }
-        }
+        pointer-events: auto;
+    }
+}
 
-        /* Mobile-specific adjustments */
+/* Enhanced mobile touch styles */
+@media (hover: none) {
+    .refs-text, .definition-word {
+        -webkit-tap-highlight-color: rgba(33, 150, 243, 0.3);
+        tap-highlight-color: rgba(33, 150, 243, 0.3);
+    }
+    
+    .refs-text:active, .definition-word:active {
+        background-color: rgba(33, 150, 243, 0.1);
+        border-radius: 3px;
+    }
+}
+
+/* Mobile-specific adjustments */
 @media (max-width: 768px) {
+    /* Keep verse popups positioned above the reference */
     .verse-popup {
-        position: fixed;
-        bottom: 20px;
-        left: 10px;
-        right: 10px;
-        transform: none;
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
         width: auto;
-        min-width: auto;
-        max-width: none;
+        min-width: 300px;
+        max-width: 95vw;
         max-height: 60vh;
-                overflow-y: auto;
-            }
+        overflow-y: auto;
+        margin-bottom: 12px;
+    }
+    
+    /* Make definition popups much wider on mobile */
+    .definition-popup {
+        max-width: 80vw;
+        min-width: 200px;
+        white-space: normal;
+        text-align: left;
+        padding: 12px 16px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    /* Improve touch targets */
+    .refs-text, .definition-word {
+        padding: 2px 4px;
+        margin: -2px -4px;
+        min-height: 24px;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    /* Ensure popups don't go off screen edges */
+    .verse-popup,
+    .definition-popup {
+        max-width: calc(100vw - 20px);
+    }
+    
+    /* Smart positioning for edge cases */
+    .verse-popup {
+        /* If popup would go off left edge */
+        left: max(10px, 50%);
+        transform: translateX(min(-50%, calc(-100vw + 90%)));
+    }
+    
+    .definition-popup {
+        /* If popup would go off left edge */
+        left: max(10px, 50%);
+        transform: translateX(min(-50%, calc(-100vw + 90%)));
+    }
+}
 
-            .definition-popup {
-                max-width: 250px;
-                white-space: normal;
-            }
-        }
+/* Small mobile adjustments */
+@media (max-width: 480px) {
+    .verse-popup {
+        min-width: 280px;
+        font-size: 12px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .verse-popup-text {
+        font-size: 12px;
+    }
+    
+    .definition-popup {
+        min-width: 180px;
+        max-width: 90vw;
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+    
+    /* Smaller close button on small screens */
+    .popup-close {
+        width: 18px;
+        height: 18px;
+        font-size: 14px;
+        top: 3px;
+        right: 6px;
+    }
+}
 
-        /* Small mobile adjustments */
-        @media (max-width: 480px) {
-            .verse-popup {
-                bottom: 10px;
-                left: 5px;
-                right: 5px;
-                font-size: 12px;
-            }
+/* Tablet adjustments */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .verse-popup {
+        min-width: 400px;
+        max-width: 80vw;
+    }
+    
+    .definition-popup {
+        max-width: 60vw;
+        min-width: 250px;
+    }
+}
 
-            .verse-popup-text {
-                font-size: 12px;
-            }
-        }
-        /* Enhanced mobile touch styles */
-        @media (hover: none) {
-            .refs-text, .definition-word {
-                -webkit-tap-highlight-color: rgba(33, 150, 243, 0.3);
-                tap-highlight-color: rgba(33, 150, 243, 0.3);
-            }
-            
-            .refs-text:active, .definition-word:active {
-                background-color: rgba(33, 150, 243, 0.1);
-                border-radius: 3px;
-            }
-        }
-        
-        /* Improve touch targets on mobile */
-        @media (max-width: 768px) {
-            .refs-text, .definition-word {
-                padding: 2px 4px;
-                margin: -2px -4px;
-                min-height: 24px;
-                display: inline-flex;
-                align-items: center;
-            }
-        } 
+/* Extra safety for very wide definition popups */
+@media (max-width: 768px) {
+    .definition-popup {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+}
     </style>
 </head>
 <body>
@@ -4718,24 +4783,55 @@ function toggleVerseStatus(reference) {
         }
         
         // mobile support functions 
+
+        function positionPopupSafely(popupElement) {
+            if (window.innerWidth <= 768) {
+                const popup = popupElement.querySelector('.verse-popup, .definition-popup');
+                if (popup) {
+                    // Get the trigger element's position
+                    const triggerRect = popupElement.getBoundingClientRect();
+                    const popupRect = popup.getBoundingClientRect();
+
+                    // Check if popup would go off the left edge
+                    if (triggerRect.left - popupRect.width/2 < 10) {
+                        popup.style.left = '0';
+                        popup.style.transform = 'none';
+                    }
+                    // Check if popup would go off the right edge
+                    else if (triggerRect.right + popupRect.width/2 > window.innerWidth - 10) {
+                        popup.style.left = 'auto';
+                        popup.style.right = '0';
+                        popup.style.transform = 'none';
+                    }
+                    // Check if popup would go off the top edge
+                    else if (triggerRect.top - popupRect.height < 10) {
+                        popup.style.bottom = 'auto';
+                        popup.style.top = '100%';
+                        popup.style.marginTop = '10px';
+                        popup.style.marginBottom = '0';
+                    }
+                }
+            }
+        }
+
         function addTapSupport() {
             document.addEventListener('click', function(e) {
                 // Close all popups first
-        const clickedPopupElement = e.target.closest('.refs-text, .definition-word');
-        
-        if (clickedPopupElement) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Check if this popup is already active
-            const isCurrentlyActive = clickedPopupElement.classList.contains('active');
-            
-            // Close all popups
-            closeAllPopups();
-            
-            // If it wasn't active, open it
-            if (!isCurrentlyActive) {
-                clickedPopupElement.classList.add('active');
+                const clickedPopupElement = e.target.closest('.refs-text, .definition-word');
+
+                if (clickedPopupElement) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Check if this popup is already active
+                    const isCurrentlyActive = clickedPopupElement.classList.contains('active');
+
+                    // Close all popups
+                    closeAllPopups();
+
+                    // If it wasn't active, open it
+                    if (!isCurrentlyActive) {
+                        clickedPopupElement.classList.add('active');
 
                         // Add close button
                         const popup = clickedPopupElement.querySelector('.verse-popup, .definition-popup');
@@ -4749,6 +4845,9 @@ function toggleVerseStatus(reference) {
                             };
                             popup.appendChild(closeBtn);
                         }
+
+                        // Position popup safely on mobile
+                        setTimeout(() => positionPopupSafely(clickedPopupElement), 10);
                     }
                 } else if (!e.target.closest('.verse-popup, .definition-popup')) {
                     // Click outside any popup or popup trigger - close all
@@ -4768,7 +4867,6 @@ function toggleVerseStatus(reference) {
             });
         }
 
-        // Replace the existing initMobileSupport function with this:
         function initMobileSupport() {
             // Detect if device supports hover
             const hasHover = window.matchMedia('(hover: hover)').matches;
