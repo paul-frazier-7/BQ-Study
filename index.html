@@ -614,14 +614,14 @@
         }
 
         /* Verse reference hover styles */
-.refs-text {
+        .refs-text {
     font-size: 11px;
     color: #888;
     position: relative;
     cursor: pointer;
-}
+        }
 
-.verse-popup {
+        .verse-popup {
     position: absolute;
     bottom: 100%;
     left: 50%;
@@ -632,17 +632,17 @@
     padding: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     z-index: 1000;
-    min-width: 600px;
-    max-width: 900px;
+    min-width: 300px;
+    max-width: min(900px, 90vw);
     width: max-content;
     white-space: normal;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s, visibility 0.2s;
     pointer-events: none;
-}
+        }
 
-.verse-popup::after {
+        .verse-popup::after {
     content: '';
     position: absolute;
     top: 100%;
@@ -650,39 +650,39 @@
     transform: translateX(-50%);
     border: 6px solid transparent;
     border-top-color: #2196f3;
-}
+        }
 
-.verse-popup-ref {
+        .verse-popup-ref {
     font-weight: bold;
     color: #2196f3;
     margin-bottom: 5px;
     font-size: 12px;
-}
+        }
 
-.verse-popup-text {
+        .verse-popup-text {
     font-size: 13px;
     line-height: 1.4;
     color: #333;
-}
+        }
 
-/* Handle multiple references in popup */
-.verse-popup-item {
+        /* Handle multiple references in popup */
+        .verse-popup-item {
     margin-bottom: 10px;
-}
+        }
 
-.verse-popup-item:last-child {
+        .verse-popup-item:last-child {
     margin-bottom: 0;
-}
+        }
 
-/* Definition popup styles */
-.definition-word {
+        /* Definition popup styles */
+        .definition-word {
     position: relative;
     cursor: pointer;
     border-bottom: 1px dotted #666;
     text-decoration: none;
-}
+        }
 
-.definition-popup {
+        .definition-popup {
     position: absolute;
     bottom: 100%;
     left: 50%;
@@ -699,32 +699,33 @@
     transition: opacity 0.2s, visibility 0.2s;
     pointer-events: none;
     margin-bottom: 5px;
-}
+    max-width: min(300px, 80vw);
+        }
 
-.definition-popup::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #333;
-}
+        .definition-popup::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #333;
+        }
 
-/* Make definition popups work inside verse popups too */
-.verse-popup .definition-popup {
+        /* Make definition popups work inside verse popups too */
+        .verse-popup .definition-popup {
     z-index: 2001;
-}
+        }
 
-/* Active state classes for mobile */
-.refs-text.active .verse-popup,
+        /* Active state classes for mobile */
+        .refs-text.active .verse-popup,
 .definition-word.active .definition-popup {
     opacity: 1;
     visibility: visible;
-    pointer-events: auto;
-}
+            pointer-events: auto;
+        }
 
-/* Close button for mobile popups */
+        /* Close button for mobile popups */
 .popup-close {
     position: absolute;
     top: 5px;
@@ -740,14 +741,14 @@
     height: 20px;
     display: flex;
     align-items: center;
-    justify-content: center;
+            justify-content: center;
 }
 
 .definition-popup .popup-close {
-    color: white;
-}
+            color: white;
+        }
 
-/* Keep hover for desktop */
+        /* Keep hover for desktop */
 @media (hover: hover) {
     .refs-text:hover {
         color: #2196f3;
@@ -761,34 +762,67 @@
     .definition-word:hover .definition-popup {
         opacity: 1;
         visibility: visible;
-        pointer-events: auto;
-    }
-}
+                pointer-events: auto;
+            }
+        }
 
-/* Mobile-specific adjustments */
+        /* Mobile-specific adjustments */
 @media (max-width: 768px) {
     .verse-popup {
-        min-width: 300px;
-        max-width: 95vw;
-        left: 2.5vw;
-        right: 2.5vw;
+        position: fixed;
+        bottom: 20px;
+        left: 10px;
+        right: 10px;
         transform: none;
         width: auto;
-    }
-    
-    .definition-popup {
-        max-width: 250px;
-        white-space: normal;
-    }
-}
+        min-width: auto;
+        max-width: none;
+        max-height: 60vh;
+                overflow-y: auto;
+            }
 
-/* Tablet adjustments */
-@media (max-width: 1024px) and (min-width: 769px) {
-    .verse-popup {
-        min-width: 400px;
-        max-width: 80vw;
-    }
-}   
+            .definition-popup {
+                max-width: 250px;
+                white-space: normal;
+            }
+        }
+
+        /* Small mobile adjustments */
+        @media (max-width: 480px) {
+            .verse-popup {
+                bottom: 10px;
+                left: 5px;
+                right: 5px;
+                font-size: 12px;
+            }
+
+            .verse-popup-text {
+                font-size: 12px;
+            }
+        }
+        /* Enhanced mobile touch styles */
+        @media (hover: none) {
+            .refs-text, .definition-word {
+                -webkit-tap-highlight-color: rgba(33, 150, 243, 0.3);
+                tap-highlight-color: rgba(33, 150, 243, 0.3);
+            }
+            
+            .refs-text:active, .definition-word:active {
+                background-color: rgba(33, 150, 243, 0.1);
+                border-radius: 3px;
+            }
+        }
+        
+        /* Improve touch targets on mobile */
+        @media (max-width: 768px) {
+            .refs-text, .definition-word {
+                padding: 2px 4px;
+                margin: -2px -4px;
+                min-height: 24px;
+                display: inline-flex;
+                align-items: center;
+            }
+        } 
     </style>
 </head>
 <body>
@@ -4684,32 +4718,71 @@ function toggleVerseStatus(reference) {
         }
         
         // mobile support functions 
-        // Replace the existing initMobileSupport function with this:
-function initMobileSupport() {
-    // Detect if device supports hover
-    const hasHover = window.matchMedia('(hover: hover)').matches;
-    
-    if (!hasHover) {
-        // Mobile device - add long press handler
-        addLongPressSupport();
+        function addTapSupport() {
+            document.addEventListener('click', function(e) {
+                // Close all popups first
+        const clickedPopupElement = e.target.closest('.refs-text, .definition-word');
         
-        // Still need click handler for closing popups
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.refs-text') && !e.target.closest('.definition-word')) {
-                closeAllPopups();
-            }
-        });
-        
-        // Close popups on scroll
-        document.addEventListener('scroll', closeAllPopups);
-    }
-}
+        if (clickedPopupElement) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Check if this popup is already active
+            const isCurrentlyActive = clickedPopupElement.classList.contains('active');
+            
+            // Close all popups
+            closeAllPopups();
+            
+            // If it wasn't active, open it
+            if (!isCurrentlyActive) {
+                clickedPopupElement.classList.add('active');
 
-function closeAllPopups() {
-    document.querySelectorAll('.refs-text.active, .definition-word.active').forEach(element => {
-        element.classList.remove('active');
-    });
-}
+                        // Add close button
+                        const popup = clickedPopupElement.querySelector('.verse-popup, .definition-popup');
+                        if (popup && !popup.querySelector('.popup-close')) {
+                            const closeBtn = document.createElement('button');
+                            closeBtn.className = 'popup-close';
+                            closeBtn.innerHTML = '×';
+                            closeBtn.onclick = (event) => {
+                                event.stopPropagation();
+                                closeAllPopups();
+                            };
+                            popup.appendChild(closeBtn);
+                        }
+                    }
+                } else if (!e.target.closest('.verse-popup, .definition-popup')) {
+                    // Click outside any popup or popup trigger - close all
+                    closeAllPopups();
+                }
+            });
+
+            // Close popups on scroll
+            document.addEventListener('scroll', closeAllPopups);
+
+            // Prevent default touch behavior on popup elements to ensure clicks work
+            document.addEventListener('touchstart', function(e) {
+                const target = e.target.closest('.refs-text, .definition-word');
+                if (target) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Replace the existing initMobileSupport function with this:
+        function initMobileSupport() {
+            // Detect if device supports hover
+            const hasHover = window.matchMedia('(hover: hover)').matches;
+
+            if (!hasHover) {
+                // Mobile device - add tap handler
+                addTapSupport();
+            }
+        }
+        function closeAllPopups() {
+            document.querySelectorAll('.refs-text.active, .definition-word.active').forEach(element => {
+                element.classList.remove('active');
+            });
+        }
 
 
 
