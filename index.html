@@ -614,125 +614,181 @@
         }
 
         /* Verse reference hover styles */
-        .refs-text {
-            font-size: 11px;
-            color: #888;
-            position: relative;
-            cursor: pointer;
-        }
+.refs-text {
+    font-size: 11px;
+    color: #888;
+    position: relative;
+    cursor: pointer;
+}
 
-        .refs-text:hover {
-            color: #2196f3;
-        }
+.verse-popup {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border: 2px solid #2196f3;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 600px;
+    max-width: 900px;
+    width: max-content;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+}
 
-        .verse-popup {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: white;
-            border: 2px solid #2196f3;
-            border-radius: 8px;
-            padding: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            min-width: 600px;
-            max-width: 900px; /* Even wider maximum */
-            width: max-content; /* Adjust to content width */
-            white-space: normal;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s, visibility 0.2s;
-            pointer-events: none;
-        }
+.verse-popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #2196f3;
+}
 
-        .refs-text:hover .verse-popup {
-            opacity: 1;
-            visibility: visible;
-        }
+.verse-popup-ref {
+    font-weight: bold;
+    color: #2196f3;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
 
-        .verse-popup::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: #2196f3;
-        }
+.verse-popup-text {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #333;
+}
 
-        .verse-popup-ref {
-            font-weight: bold;
-            color: #2196f3;
-            margin-bottom: 5px;
-            font-size: 12px;
-        }
+/* Handle multiple references in popup */
+.verse-popup-item {
+    margin-bottom: 10px;
+}
 
-        .verse-popup-text {
-            font-size: 13px;
-            line-height: 1.4;
-            color: #333;
-        }
+.verse-popup-item:last-child {
+    margin-bottom: 0;
+}
 
-        /* Handle multiple references in popup */
-        .verse-popup-item {
-            margin-bottom: 10px;
-        }
+/* Definition popup styles */
+.definition-word {
+    position: relative;
+    cursor: pointer;
+    border-bottom: 1px dotted #666;
+    text-decoration: none;
+}
 
-        .verse-popup-item:last-child {
-            margin-bottom: 0;
-        }
+.definition-popup {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+    margin-bottom: 5px;
+}
 
-        /* Definition popup styles */
-        .definition-word {
-            position: relative;
-            cursor: help;
-            border-bottom: 1px dotted #666;
-            text-decoration: none;
-        }
+.definition-popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+}
 
-        .definition-word:hover {
-            border-bottom-color: #2196f3;
-        }
+/* Make definition popups work inside verse popups too */
+.verse-popup .definition-popup {
+    z-index: 2001;
+}
 
-        .definition-popup {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            white-space: nowrap;
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s, visibility 0.2s;
-            pointer-events: none;
-            margin-bottom: 5px;
-        }
+/* Active state classes for mobile */
+.refs-text.active .verse-popup,
+.definition-word.active .definition-popup {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
 
-        .definition-word:hover .definition-popup {
-            opacity: 1;
-            visibility: visible;
-        }
+/* Close button for mobile popups */
+.popup-close {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #666;
+    font-weight: bold;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .definition-popup::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: #333;
-        }
+.definition-popup .popup-close {
+    color: white;
+}
 
-        /* Make definition popups work inside verse popups too */
-        .verse-popup .definition-popup {
-            z-index: 2001;
-        }        
+/* Keep hover for desktop */
+@media (hover: hover) {
+    .refs-text:hover {
+        color: #2196f3;
+    }
+    
+    .definition-word:hover {
+        border-bottom-color: #2196f3;
+    }
+    
+    .refs-text:hover .verse-popup,
+    .definition-word:hover .definition-popup {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    .verse-popup {
+        min-width: 300px;
+        max-width: 95vw;
+        left: 2.5vw;
+        right: 2.5vw;
+        transform: none;
+        width: auto;
+    }
+    
+    .definition-popup {
+        max-width: 250px;
+        white-space: normal;
+    }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .verse-popup {
+        min-width: 400px;
+        max-width: 80vw;
+    }
+}   
     </style>
 </head>
 <body>
@@ -4156,6 +4212,10 @@
 
                 container.appendChild(sectionDiv);
             });
+
+            setTimeout(() => {
+                initMobileSupport();
+            }, 100);
         }
 
 function renderVerseText(verse) {
@@ -4622,7 +4682,39 @@ function toggleVerseStatus(reference) {
             document.getElementById('categoryEditor').style.display = 'none';
             document.getElementById('newCategoryInput').value = '';
         }
-        // Add keyboard support for the category editor
+        
+        // mobile support functions 
+        // Replace the existing initMobileSupport function with this:
+function initMobileSupport() {
+    // Detect if device supports hover
+    const hasHover = window.matchMedia('(hover: hover)').matches;
+    
+    if (!hasHover) {
+        // Mobile device - add long press handler
+        addLongPressSupport();
+        
+        // Still need click handler for closing popups
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.refs-text') && !e.target.closest('.definition-word')) {
+                closeAllPopups();
+            }
+        });
+        
+        // Close popups on scroll
+        document.addEventListener('scroll', closeAllPopups);
+    }
+}
+
+function closeAllPopups() {
+    document.querySelectorAll('.refs-text.active, .definition-word.active').forEach(element => {
+        element.classList.remove('active');
+    });
+}
+
+
+
+
+// Add keyboard support for the category editor
         document.addEventListener('keydown', function(e) {
             if (state.editingCategory) {
                 if (e.key === 'Enter') {
