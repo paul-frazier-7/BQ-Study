@@ -1,447 +1,721 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>React BQ Study App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    .data-selector {
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: #e3f2fd;
-      border-radius: 5px;
-      border: 2px solid #2196f3;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Verses Study App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .data-selector h3 {
-      margin-top: 0;
-      color: #1976d2;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
 
-    .data-selector-buttons {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    .data-selector-button {
-      padding: 8px 16px;
-      border: 2px solid #2196f3;
-      background-color: white;
-      color: #2196f3;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s;
-    }
+        .header {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 18px 0 8px;
+            text-align: center;
+        }
 
-    .data-selector-button.active {
-      background-color: #2196f3;
-      color: white;
-    }
+        .selector-box {
+            margin: 10px;
+            padding: 14px;
+            background-color: #e3f2fd;
+            border-radius: 6px;
+            border: 2px solid #2196f3;
+        }
 
-    .data-selector-button:hover {
-      background-color: #1976d2;
-      color: white;
-      border-color: #1976d2;
-    }
+        .selector-title {
+            font-size: 16px;
+            color: #1976d2;
+            font-weight: bold;
+        }
 
-    @media (max-width: 768px) {
-      .data-selector-buttons {
-        flex-direction: column;
-      }
+        .selector-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 6px;
+            gap: 8px;
+        }
 
-      .data-selector-button {
-        width: 100%;
-      }
-    }
-    .question-indicator {
-      background-color: #f3e5f5;
-      border-left: 4px solid #9c27b0;
-      padding: 2px 6px;
-      margin: 2px 0;
-      border-radius: 3px;
-      font-size: 12px;
-      color: #7b1fa2;
-    }
-    .statement-indicator {
-      background-color: #e1f5fe;
-      border-left: 4px solid #2196f3;
-      padding: 2px 6px;
-      margin: 2px 0;
-      border-radius: 3px;
-      font-size: 12px;
-      color: #1976d2;
-    }
+        .selector-button {
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: 2px solid #2196f3;
+            background-color: white;
+            color: #2196f3;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-    .exclamation-indicator {
-      background-color: #fff3e0;
-      border-left: 4px solid #ff9800;
-      padding: 2px 6px;
-      margin: 2px 0;
-      border-radius: 3px;
-      font-size: 12px;
-      color: #f57c00;
-    }
+        .selector-button.active {
+            background-color: #2196f3;
+            color: white;
+        }
 
-    .verse-statement-flags {
-      margin-top: 5px;
-    }
-    .division-filter-controls {
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #fff;
-    }
+        .filter-block {
+            margin: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .division-toggles {
-      margin-bottom: 10px;
-    }
+        .search-box {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 7px;
+            background-color: white;
+        }
 
-    .division-toggle {
-      margin-right: 10px;
-      margin-bottom: 5px;
-      padding: 5px 10px;
-      border: 1px solid #ddd;
-      background-color: #f9f9f9;
-      border-radius: 3px;
-      cursor: pointer;
-      display: inline-block;
-    }
+        .filters-button, .clear-button {
+            border-radius: 4px;
+            padding: 7px 16px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-    .division-toggle.active {
-      background-color: #9c27b0;
-      color: white;
-    }
+        .filters-button {
+            background-color: #2196f3;
+            color: white;
+        }
 
-    .division-stats {
-      font-size: 14px;
-      color: #666;
-      margin-top: 10px;
-    }
+        .clear-button {
+            background-color: #ff6b6b;
+            color: white;
+        }
 
-    @media (max-width: 768px) {
-      .division-toggle {
-        display: block;
-        margin-bottom: 5px;
-        margin-right: 0;
-        width: 100%;
-      }
-    }
-    .charting-filter-controls {
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #fff;
-    }
+        .stats-text {
+            margin: 12px;
+            font-style: italic;
+            color: #666;
+        }
 
-    .charting-category-toggles {
-      margin-bottom: 10px;
-    }
+        .section-header {
+            font-weight: bold;
+            font-size: 17px;
+            margin-top: 10px;
+        }
 
-    .charting-category-toggle {
-      margin-right: 10px;
-      margin-bottom: 5px;
-      padding: 5px 10px;
-      border: 1px solid #ddd;
-      background-color: #f9f9f9;
-      border-radius: 3px;
-      cursor: pointer;
-      display: inline-block;
-    }
+        .subsection-header {
+            font-weight: bold;
+            font-size: 15px;
+        }
 
-    .charting-category-toggle.active {
-      background-color: #ff9800;
-      color: white;
-    }
+        .subsection-stats {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 5px;
+        }
 
-    .charting-stats {
-      font-size: 14px;
-      color: #666;
-      margin-top: 10px;
-    }
+        .verse-item {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            padding: 10px;
+            margin: 6px 0 5px;
+        }
 
-    @media (max-width: 768px) {
-      .charting-category-toggle {
-        display: block;
-        margin-bottom: 5px;
-        margin-right: 0;
-        width: 100%;
-      }
-    }
-    .word-filter-controls {
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #fff;
-    }
+        .verse-item.learned {
+            background-color: #e8f5e8;
+            border-color: #4caf50;
+        }
 
-    .word-type-toggles {
-      margin-bottom: 10px;
-    }
+        .verse-reference {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
 
-    .word-type-toggle {
-      margin-right: 10px;
-      padding: 5px 10px;
-      border: 1px solid #ddd;
-      background-color: #f9f9f9;
-      border-radius: 3px;
-      cursor: pointer;
-    }
+        .learned-button {
+            background-color: #4caf50;
+            border-radius: 4px;
+            margin-top: 7px;
+            padding: 6px 16px;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-    .word-type-toggle.active {
-      background-color: #4caf50;
-      color: white;
-    }
+        .learned-button.active {
+            background-color: #2196f3;
+        }
 
-    .word-list-button {
-      background-color: #2196f3;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 3px;
-      cursor: pointer;
-      margin-left: 10px;
-    }
+        .search-highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
 
-    .word-list-dropdown {
-      position: relative;
-      display: inline-block;
-    }
+        .type1 { color: blue; }
+        .type2 { color: green; }
+        .type3 { color: red; }
 
-    .word-list-menu {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 3px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      max-height: 200px;
-      overflow-y: auto;
-      min-width: 200px;
-      z-index: 1000;
-    }
+        .proper-name {
+            background-color: #ffe082;
+            border-radius: 4px;
+            padding: 0 2px;
+            
+        }
 
-    .word-list-item {
-      padding: 8px 12px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
-    }
+        .animal {
+            background-color: #bbdefb;
+            border-radius: 4px;
+            padding: 0 2px;
+        }
 
-    .word-list-item:hover {
-      background-color: #f5f5f5;
-    }
+        .location {
+            background-color: #bbdefb;
+            border-radius: 4px;
+            padding: 0 2px;
+        }
 
-    .word-list-item.selected {
-      background-color: #e3f2fd;
-    }
+        .refs-text {
+            font-size: 11px;
+            color: #888;
+        }
 
-    @media (max-width: 768px) {
-      .word-type-toggle {
-        display: block;
-        margin-bottom: 5px;
-        margin-right: 0;
-      }
+        .verse-beginning {
+            text-decoration: underline;
+            font-weight: bold;
+        }
 
-      .word-list-menu {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        max-width: 90%;
-        max-height: 60%;
-      }
-    }
-    .verse-beginning {
-      text-decoration: underline;
-      font-weight: bold;
-    }
+        .indicator {
+            padding: 2px 6px;
+            margin: 1px 6px 1px 0;
+            border-radius: 3px;
+            font-size: 12px;
+            border-left: 4px solid;
+            display: inline-block;
+        }
 
-    .highlighted {
-      font-weight: bold;
-    }
+        .exclamation-indicator {
+            background-color: #fff3e0;
+            border-left-color: #ff9800;
+            color: #f57c00;
+        }
 
-    .highlighted.type1 {
-      color: blue;
-      
-    }
+        .question-indicator {
+            background-color: #f3e5f5;
+            border-left-color: #9c27b0;
+            color: #7b1fa2;
+        }
 
-    .highlighted.type2 {
-      color: green;
-    }
+        .statement-indicator {
+            background-color: #e1f5fe;
+            border-left-color: #2196f3;
+            color: #1976d2;
+        }
 
-    .highlighted.type3 {
-      color: rgb(255, 136, 0);
-    }
+        .filter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.2);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
 
-    /* When highlighted words are inside verse-beginning, they inherit the underline */
-    .verse-beginning .highlighted {
-      text-decoration: underline;
-      font-weight: bold;
-    }
-    .search-highlight {
-      background-color: yellow;
-      font-weight: bold;
-    }
-    .verse-list {
-      list-style: none;
-      padding: 0;
-    }
-    .verse-item {
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 5px;
-      position: relative;
-    }
-    .verse-item.learned {
-      background-color: #e8f5e8;
-      border-color: #4caf50;
-    }
-    .subsection {
-        margin-left: 20px; /* Indent subsections */
-    }
-    .controls {
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: #f5f5f5;
-      border-radius: 5px;
-    }
-    .filter-controls {
-      margin-bottom: 15px;
-    }
-    .filter-controls label {
-      margin-right: 15px;
-      display: inline-block;
-    }
-    .learned-button {
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 3px;
-      cursor: pointer;
-      margin-left: 10px;
-    }
-    .learned-button.learned {
-      background-color: #2196f3;
-    }
-    .learned-button:hover {
-      opacity: 0.8;
-    }
-    .stats {
-      margin-top: 10px;
-      font-style: italic;
-      color: #666;
-    }
-    .search-box {
-      width: 100%;
-      max-width: 400px;
-      padding: 10px;
-      font-size: 16px;
-      border: 2px solid #ddd;
-      border-radius: 5px;
-      margin-bottom: 15px;
-    }
-    .search-box:focus {
-      border-color: #4caf50;
-      outline: none;
-    }
-    .search-results {
-      color: #666;
-      font-style: italic;
-      margin-bottom: 10px;
-    }
-    .clear-search {
-      background-color: #ff6b6b;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 3px;
-      cursor: pointer;
-      margin-left: 10px;
-    }
-    .clear-search:hover {
-      opacity: 0.8;
-    }
-    .word-frequency-legend {
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      padding: 10px;
-      margin-bottom: 15px;
-    }
-    .legend-item {
-      display: inline-block;
-      margin-right: 20px;
-      font-size: 14px;
-    }
+        .filter-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
 
-    /* Mobile Optimizations */
-    @media (max-width: 768px) {
-      .controls {
-        padding: 10px;
-      }
-      
-      .filter-controls label {
-        display: block;
-        margin-bottom: 10px;
-        margin-right: 0;
-      }
-      
-      .search-box {
-        max-width: 100%;
-      }
-      
-      .verse-item {
-        padding: 8px;
-        margin-bottom: 8px;
-      }
-      
-      .learned-button {
-        display: block;
-        margin: 10px 0 0 0;
-        width: 100%;
-      }
+        .filter-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 88vh;
+            background-color: white;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            padding: 12px;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+        }
 
-      .subsection {
-        margin-left: 10px;
-      }
+        .filter-drawer.open {
+            transform: translateY(0);
+        }
 
-      .clear-search {
-        display: block;
-        margin: 10px 0;
-        width: 100%;
-      }
+        .filter-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
 
-      .legend-item {
-        display: block;
-        margin-bottom: 5px;
-      }
-    }
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
 
-    /* Better touch targets */
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-    }
+        .close-drawer {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            align-self: flex-end;
+        }
 
-    button {
-      min-height: 44px;
-    }
-  </style>
+        .switch-container {
+            display: flex;
+            align-items: center;
+            margin-right: 18px;
+            margin-bottom: 10px;
+        }
+
+        .switch-container label {
+            margin-right: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-switch.active {
+            background-color: #2196f3;
+        }
+
+        .toggle-switch-handle {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-switch-handle {
+            transform: translateX(26px);
+        }
+
+        .toggle-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .section-checkbox {
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            padding: 6px;
+            margin: 3px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .section-checkbox.active {
+            background-color: #2196f3;
+            color: white;
+            font-weight: bold;
+        }
+
+        .word-type-toggle {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            padding: 6px 13px;
+            margin: 0 7px 6px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .word-type-toggle.active {
+            background-color: #4caf50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .word-list-button {
+            background-color: #2196f3;
+            border-radius: 4px;
+            padding: 7px;
+            margin-top: 6px;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .word-list-modal {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            padding: 16px;
+            margin-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .word-list-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 2px;
+        }
+
+        .word-list-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .word-list-item.selected {
+            background-color: #e3f2fd;
+        }
+
+        .charting-toggle, .division-toggle {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            padding: 6px 13px;
+            margin: 0 7px 6px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .charting-toggle.active {
+            background-color: #ff9800;
+            color: white;
+            font-weight: bold;
+        }
+
+        .division-toggle.active {
+            background-color: #9c27b0;
+            color: white;
+            font-weight: bold;
+        }
+
+        .clear-filter-button {
+            border: 1px solid #ff9800 !important;
+            color: #ff9800 !important;
+            font-weight: bold;
+            background-color: white !important;
+        }
+
+        .clear-division-button {
+            border: 1px solid #9c27b0 !important;
+            color: #9c27b0 !important;
+            font-weight: bold;
+            background-color: white !important;
+        }
+        /* Category Styles Start */
+        .edit-category-button {
+            background-color: #2196f3;
+            border-radius: 4px;
+            margin-top: 7px;
+            padding: 6px 16px;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .edit-category-button:hover {
+            background-color: #1976d2;
+        }
+
+        .category-editor-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1999;
+        }
+
+        .category-editor {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 2000;
+            min-width: 400px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+
+        .category-editor h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .category-editor h4 {
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+.category-editor p {
+    margin-bottom: 15px;
+    color: #666;
+        }
+
+        .category-list {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 5px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .category-item-text {
+            flex: 1;
+            margin-right: 10px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .remove-single-category {
+            background-color: #ff6b6b;
+            color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .remove-single-category:hover {
+            background-color: #ff5252;
+        }
+
+        .add-new-category {
+            margin-top: 15px;
+        }
+
+        .add-new-category input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+        }
+
+        .add-new-category input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+
+        .category-editor-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .category-editor-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .save-category {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .save-category:hover {
+            background-color: #45a049;
+        }
+
+        .cancel-category {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .cancel-category:hover {
+            background-color: #da190b;
+        }
+
+        .remove-category {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .remove-category:hover {
+            background-color: #f57c00;
+        }
+
+        /* Style for when no categories exist */
+        .category-editor .no-categories {
+            color: #999;
+            font-style: italic;
+            padding: 15px;
+            text-align: center;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border: 1px dashed #ddd;
+        }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel">
-    
-  const bibleData2025 = {
+    <div class="container">
+        <h1 class="header">Bible Verses</h1>
+        
+        <div class="selector-box">
+            <div class="selector-title">Select Bible Data Set:</div>
+            <div class="selector-buttons" id="dataSetButtons"></div>
+        </div>
+
+        <div class="filter-block">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search verses by text or reference..." />
+            <button class="filters-button" onclick="openFilters()">Filters</button>
+            <button class="clear-button" id="clearButton" onclick="clearSearch()" style="display: none;">Clear</button>
+        </div>
+
+        <div class="stats-text" id="statsText"></div>
+
+        <div id="versesContainer"></div>
+    </div>
+
+    <!-- Filter Drawer -->
+    <div class="filter-overlay" id="filterOverlay" onclick="closeFilters()"></div>
+    <div class="filter-drawer" id="filterDrawer">
+        <button class="close-drawer" onclick="closeFilters()">Close</button>
+        <h3 class="filter-title">Filter Options</h3>
+        
+        <!-- Learned/Unlearned toggles -->
+        <div class="filter-section">
+            <div class="toggle-row">
+                <div class="switch-container">
+                    <label>Show only learned</label>
+                    <div class="toggle-switch" id="learnedToggle" onclick="toggleLearned()">
+                        <div class="toggle-switch-handle"></div>
+                    </div>
+                </div>
+                <div class="switch-container">
+                    <label>Show only unlearned</label>
+                    <div class="toggle-switch" id="unlearnedToggle" onclick="toggleUnlearned()">
+                        <div class="toggle-switch-handle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sections -->
+        <div class="filter-section">
+            <h4 class="filter-title">Sections</h4>
+            <div class="toggle-row" id="sectionToggles"></div>
+        </div>
+
+        <!-- Word Frequency -->
+        <div class="filter-section">
+            <h4 class="filter-title">Word Frequency</h4>
+            <div class="toggle-row" id="wordFrequencyToggles"></div>
+            <div id="wordListContainer" style="display: none;">
+                <button class="word-list-button" id="wordListButton" onclick="toggleWordList()">
+                    Show Words (0)
+                </button>
+                <div class="word-list-modal" id="wordListModal" style="display: none;">
+                    <div id="wordListItems"></div>
+                    <button onclick="closeWordList()" style="margin-top: 10px; background: none; border: none; color: #2196f3; font-weight: bold; cursor: pointer;">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charting Categories -->
+        <div class="filter-section">
+            <h4 class="filter-title">Charting Categories</h4>
+            <div class="toggle-row" id="chartingToggles"></div>
+        </div>
+
+        <!-- Divisions -->
+        <div class="filter-section">
+            <h4 class="filter-title">Divisions</h4>
+            <div class="toggle-row" id="divisionToggles"></div>
+        </div>
+    </div>
+
+    <!-- Category Editor Modal -->
+    <div class="category-editor-overlay" id="categoryEditorOverlay" style="display: none;" onclick="closeCategoryEditor()"></div>
+    <div class="category-editor" id="categoryEditor" style="display: none;">
+        <h3>Manage Charting Categories</h3>
+        <p><strong>Verse:</strong> <span id="editingVerseRef"></span></p>
+        
+        <div class="category-list">
+            <h4>Current Categories:</h4>
+            <div id="currentCategoriesList"></div>
+        </div>
+        
+        <div class="add-new-category">
+            <h4>Add New Category:</h4>
+            <input type="text" id="newCategoryInput" placeholder="Enter new category..." />
+            <div class="category-editor-buttons">
+                <button class="cancel-category" onclick="closeCategoryEditor()">Cancel</button>
+                <button class="save-category" onclick="addNewCategory()">Add Category</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JSON data
+        const bibleData2025 = {
     
 "sections": 
 [
@@ -1457,7 +1731,7 @@
         }
 ]  
 };  
-  const bibleData2026 = {
+        const bibleData2026 = {
         "sections": 
 [
         {
@@ -1472,16 +1746,16 @@
           "verses": [
             {
               "reference": "Exodus 24:12",
-              "text": "And the Lord said unto Moses, Come/ up to me into the mount, and be there: and I will give thee tables of stone, and a law, and commandments which I have written; that thou mayest teach them.",
+              "text": "And the Lord said unto Moses, Come up to me into the mount, and be there: and I will give thee tables of stone, and a law, and commandments which I have written; that thou mayest teach them.",
               "highlights": [
-                { "word": "Moses", "type": "type3" }
+                { "word": "Moses", "type": "proper" }
               ],
-              "chartingType": "cross-reference",
+              //"chartingType": "cross-reference",
               "divisions": ["Beginner", "JR"]
             },
             {
               "reference": "Deuteronomy 6:6",
-              "text": "And these words,/ which I command thee this day, shall be in thine heart:",
+              "text": "And these words, which I command thee this day, shall be in thine heart:",
               "highlights": [],
               "divisions": ["Beginner", "JR"]
             },
@@ -1489,7 +1763,7 @@
               "reference": "Deuteronomy 6:7",
               "text": "And thou shalt teach them diligently unto thy children, and shalt talk of them when thou sittest in thine house, and when thou walkest by the way, and when thou liest down, and when thou risest up.",
               "highlights": [],
-              "chartingType": "cross-reference"
+              //"chartingType": "cross-reference"
             },
             {
               "reference": "Deuteronomy 6:8",
@@ -3086,802 +3360,972 @@
     };
 
 
-function App() {
-  // Add state for selected data set
-  const [selectedDataSet, setSelectedDataSet] = React.useState('2025');
-  
-  // Your existing states
-  const [learnedVerses, setLearnedVerses] = React.useState(new Set());
-  const [selectedSections, setSelectedSections] = React.useState(new Set());
-  const [showOnlyLearned, setShowOnlyLearned] = React.useState(false);
-  const [showOnlyUnlearned, setShowOnlyUnlearned] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [wordFrequency, setWordFrequency] = React.useState({});
-  const [highlightedWords, setHighlightedWords] = React.useState({});
-  const [activeWordFilter, setActiveWordFilter] = React.useState(null);
-  const [selectedSpecificWords, setSelectedSpecificWords] = React.useState(new Set());
-  const [showWordMenu, setShowWordMenu] = React.useState(false);
-  const [chartingCategories, setChartingCategories] = React.useState({});
-  const [selectedChartingCategories, setSelectedChartingCategories] = React.useState(new Set());
-  const [divisions, setDivisions] = React.useState({});
-  const [selectedDivisions, setSelectedDivisions] = React.useState(new Set());
+        // App state
+        let state = {
+            selectedDataSet: '2026',
+            learnedVerses: new Set(),
+            selectedSections: new Set(),
+            showOnlyLearned: false,
+            showOnlyUnlearned: false,
+            searchTerm: '',
+            wordStats: {},
+            verseSplitMap: {},
+            activeWordFilter: null,
+            selectedSpecificWords: new Set(),
+            showWordMenu: false,
+            chartingCategories: {},
+            selectedChartingCategories: new Set(),
+            divisions: {},
+            selectedDivisions: new Set(),
+            editingCategory: false,
+            editingVerse: null
+        };
 
-  // Define your data sets
-  const dataSets = {
-    '2025': bibleData2025 || {},
-    '2026': bibleData2026 || {}
-  };
+        const dataSets = {
+            '2025': bibleData2025,
+            '2026': bibleData2026
+        };
+        const dataSetNames = {
+            '2025': 'The Word',
+            '2026': 'Firm Foundation'
+        };
 
-  // Get current data set
-  const currentBibleData = dataSets[selectedDataSet];
-
-  // Update the data set and reset filters
-  const changeDataSet = (dataSetKey) => {
-    setSelectedDataSet(dataSetKey);
-    
-    // Reset all filters when changing data sets
-    setSearchTerm('');
-    setActiveWordFilter(null);
-    setSelectedSpecificWords(new Set());
-    setShowWordMenu(false);
-    setSelectedChartingCategories(new Set());
-    setSelectedDivisions(new Set());
-    setShowOnlyLearned(false);
-    setShowOnlyUnlearned(false);
-    
-    // Reset sections to all sections of new data set
-    if (dataSets[dataSetKey].sections) {
-      setSelectedSections(new Set(dataSets[dataSetKey].sections.map(s => s.sectionNumber)));
-    } else {
-      setSelectedSections(new Set());
-    }
-  };
-
-  // Load saved data on component mount - include data set in key
-  React.useEffect(() => {
-    const savedDataSet = localStorage.getItem('selectedDataSet');
-    if (savedDataSet && dataSets[savedDataSet]) {
-      setSelectedDataSet(savedDataSet);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    const savedLearned = localStorage.getItem(`learnedVerses_${selectedDataSet}`);
-    const savedSections = localStorage.getItem(`selectedSections_${selectedDataSet}`);
-    
-    if (savedLearned) {
-      setLearnedVerses(new Set(JSON.parse(savedLearned)));
-    } else {
-      setLearnedVerses(new Set());
-    }
-    
-    if (savedSections && currentBibleData.sections) {
-      setSelectedSections(new Set(JSON.parse(savedSections)));
-    } else if (currentBibleData.sections) {
-      setSelectedSections(new Set(currentBibleData.sections.map(s => s.sectionNumber)));
-    }
-  }, [selectedDataSet, currentBibleData]);
-
-  // Save learned verses when they change - include data set in key
-  React.useEffect(() => {
-    localStorage.setItem(`learnedVerses_${selectedDataSet}`, JSON.stringify([...learnedVerses]));
-  }, [learnedVerses, selectedDataSet]);
-
-  // Save selected sections when they change - include data set in key
-  React.useEffect(() => {
-    localStorage.setItem(`selectedSections_${selectedDataSet}`, JSON.stringify([...selectedSections]));
-  }, [selectedSections, selectedDataSet]);
-
-  // Save selected data set
-  React.useEffect(() => {
-    localStorage.setItem('selectedDataSet', selectedDataSet);
-  }, [selectedDataSet]);
-
-  // Update highlighted words collection to use current data set
-  React.useEffect(() => {
-    if (!currentBibleData.sections) return;
-
-    const highlighted = { type1: new Set(), type2: new Set(), type3: new Set() };
-    
-    currentBibleData.sections.forEach(section => {
-      section.subsections.forEach(subsection => {
-        subsection.verses.forEach(verse => {
-          if (verse.highlights) {
-            verse.highlights.forEach(highlight => {
-              if (highlight.type === 'type1') highlighted.type1.add(highlight.word.toLowerCase());
-              else if (highlight.type === 'type2') highlighted.type2.add(highlight.word.toLowerCase());
-              else if (highlight.type === 'type3') highlighted.type3.add(highlight.word.toLowerCase());
-            });
-          }
-        });
-      });
-    });
-
-    setHighlightedWords(highlighted);
-  }, [selectedDataSet, currentBibleData]);
-
-  // Update charting categories collection to use current data set
-  React.useEffect(() => {
-    if (!currentBibleData.sections) return;
-
-    const categories = {};
-    
-    currentBibleData.sections.forEach(section => {
-      section.subsections.forEach(subsection => {
-        subsection.verses.forEach(verse => {
-          // Manual charting types from JSON
-          if (verse.chartingType) {
-            if (!categories[verse.chartingType]) {
-              categories[verse.chartingType] = 0;
+        // Initialize app
+        function init() {
+            // Initialize selected sections for the default dataset
+            const currentData = dataSets[state.selectedDataSet];
+            if (currentData.sections) {
+                state.selectedSections = new Set(currentData.sections.map(s => s.sectionNumber));
             }
-            categories[verse.chartingType]++;
-          }
-          
-          // Auto-detect exclamations
-          if (verse.text.includes('!')) {
-            const exclamationType = 'auto-exclamation';
-            if (!categories[exclamationType]) {
-              categories[exclamationType] = 0;
-            }
-            categories[exclamationType]++;
-          }
-          
-          // Auto-detect questions
-          if (verse.text.includes('?')) {
-            const questionType = 'auto-question';
-            if (!categories[questionType]) {
-              categories[questionType] = 0;
-            }
-            categories[questionType]++;
-          }
-          
-          // Auto-detect statements from JSON flags
-          if (verse.statementFlags && Array.isArray(verse.statementFlags)) {
-            verse.statementFlags.forEach(flag => {
-              const flagType = `statement-${flag}`;
-              if (!categories[flagType]) {
-                categories[flagType] = 0;
-              }
-              categories[flagType]++;
+            createDataSetButtons();
+            updateSectionToggles();
+            updateWordStats();
+            updateVerseSplitMap();
+            updateChartingCategories();
+            updateDivisions();
+            updateAllFilterToggles();
+            renderVerses();
+            updateStats();
+
+            // Set up search input
+            document.getElementById('searchBox').addEventListener('input', (e) => {
+                state.searchTerm = e.target.value;
+                document.getElementById('clearButton').style.display = e.target.value ? 'block' : 'none';
+                renderVerses();
+                updateStats();
             });
-          }
-        });
-      });
-    });
+        }
 
-    setChartingCategories(categories);
-  }, [selectedDataSet, currentBibleData]);
-
-  // Update divisions collection to use current data set
-  React.useEffect(() => {
-    if (!currentBibleData.sections) return;
-
-    const divisionCounts = {};
-    
-    currentBibleData.sections.forEach(section => {
-      section.subsections.forEach(subsection => {
-        subsection.verses.forEach(verse => {
-          if (verse.divisions && Array.isArray(verse.divisions)) {
-            verse.divisions.forEach(division => {
-              if (!divisionCounts[division]) {
-                divisionCounts[division] = 0;
-              }
-              divisionCounts[division]++;
-            });
-          }
-        });
-      });
-    });
-
-    setDivisions(divisionCounts);
-  }, [selectedDataSet, currentBibleData]);
-
-  const toggleVerseStatus = (reference) => {
-    setLearnedVerses(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(reference)) {
-        newSet.delete(reference);
-      } else {
-        newSet.add(reference);
-      }
-      return newSet;
-    });
-  };
-
-  const toggleSection = (sectionNumber) => {
-    setSelectedSections(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(sectionNumber)) {
-        newSet.delete(sectionNumber);
-      } else {
-        newSet.add(sectionNumber);
-      }
-      return newSet;
-    });
-  };
-
-  const clearSearch = () => {
-    setSearchTerm('');
-  };
-
-  const toggleWordFilter = (type) => {
-    if (activeWordFilter === type) {
-      setActiveWordFilter(null);
-      setSelectedSpecificWords(new Set());
-    } else {
-      setActiveWordFilter(type);
-      setSelectedSpecificWords(new Set());
-    }
-    setShowWordMenu(false);
-  };
-
-  const toggleSpecificWord = (word) => {
-    setSelectedSpecificWords(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(word)) {
-        newSet.delete(word);
-      } else {
-        newSet.add(word);
-      }
-      return newSet;
-    });
-  };
-
-  const toggleChartingCategory = (category) => {
-    setSelectedChartingCategories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(category)) {
-        newSet.delete(category);
-      } else {
-        newSet.add(category);
-      }
-      return newSet;
-    });
-  };
-
-  const clearChartingFilter = () => {
-    setSelectedChartingCategories(new Set());
-  };
-
-  const toggleDivision = (division) => {
-    setSelectedDivisions(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(division)) {
-        newSet.delete(division);
-      } else {
-        newSet.add(division);
-      }
-      return newSet;
-    });
-  };
-
-  const clearDivisionFilter = () => {
-    setSelectedDivisions(new Set());
-  };
-
-  // Check if a verse matches the word filter criteria
-  const verseMatchesWordFilter = (verse) => {
-    if (!activeWordFilter) return true;
-    
-    const verseText = verse.text.toLowerCase();
-    const verseWords = verseText.replace(/[^\w\s]/g, '').split(/\s+/);
-    
-    // If specific words are selected, check for those
-    if (selectedSpecificWords.size > 0) {
-      return Array.from(selectedSpecificWords).some(word => 
-        verseWords.includes(word.toLowerCase())
-      );
-    }
-    
-    // Otherwise check if verse contains any words of the active type
-    const wordsOfType = highlightedWords[activeWordFilter] || new Set();
-    return verseWords.some(word => wordsOfType.has(word));
-  };
-
-  // Check if a verse matches the charting filter criteria
-  const verseMatchesChartingFilter = (verse) => {
-    if (selectedChartingCategories.size === 0) return true;
-    
-    const verseCategories = new Set();
-    
-    // Add manual charting type
-    if (verse.chartingType) {
-      verseCategories.add(verse.chartingType);
-    }
-    
-    // Add auto-detected exclamation
-    if (verse.text.includes('!')) {
-      verseCategories.add('auto-exclamation');
-    }
-    
-    // Add auto-detected questions
-    if (verse.text.includes('?')) {
-      verseCategories.add('auto-question');
-    }
-    
-    // Add statement flags
-    if (verse.statementFlags && Array.isArray(verse.statementFlags)) {
-      verse.statementFlags.forEach(flag => {
-        verseCategories.add(`statement-${flag}`);
-      });
-    }
-    
-    // Check if any of the verse's categories match selected filters
-    return Array.from(selectedChartingCategories).some(selected => 
-      verseCategories.has(selected)
-    );
-  };
-
-  // Check if a verse matches the division filter criteria
-  const verseMatchesDivisionFilter = (verse) => {
-    if (selectedDivisions.size === 0) return true;
-    if (!verse.divisions || !Array.isArray(verse.divisions)) return false;
-    
-    // Check if verse has ANY of the selected divisions
-    return verse.divisions.some(division => selectedDivisions.has(division));
-  };
-
-  // Update filteredSections to use current data set
-  const filteredSections = React.useMemo(() => {
-    if (!currentBibleData.sections) return [];
-    
-    let sections = currentBibleData.sections.filter(section => 
-      selectedSections.has(section.sectionNumber)
-    );
-
-    // Apply filters
-    sections = sections.map(section => ({
-      ...section,
-      subsections: section.subsections.map(subsection => ({
-        ...subsection,
-        verses: subsection.verses.filter(verse => {
-          const matchesSearch = !searchTerm.trim() || 
-            verse.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            verse.reference.toLowerCase().includes(searchTerm.toLowerCase());
-          
-          const matchesWordFilter = verseMatchesWordFilter(verse);
-          const matchesChartingFilter = verseMatchesChartingFilter(verse);
-          const matchesDivisionFilter = verseMatchesDivisionFilter(verse);
-          
-          return matchesSearch && matchesWordFilter && matchesChartingFilter && matchesDivisionFilter;
-        })
-      })).filter(subsection => subsection.verses.length > 0)
-    })).filter(section => section.subsections.length > 0);
-
-    return sections;
-  }, [selectedSections, searchTerm, activeWordFilter, selectedSpecificWords, highlightedWords, selectedChartingCategories, selectedDivisions, currentBibleData]);
-
-  // Update statistics to use current data set
-  const totalVerses = currentBibleData.sections?.reduce((total, section) => 
-    total + section.subsections.reduce((subTotal, subsection) => 
-      subTotal + subsection.verses.length, 0), 0) || 0;
-  const learnedCount = learnedVerses.size;
-
-  // Calculate search results count
-  const searchResultsCount = React.useMemo(() => {
-    return filteredSections.reduce((total, section) => 
-      total + section.subsections.reduce((subTotal, subsection) => 
-        subTotal + subsection.verses.length, 0), 0);
-  }, [filteredSections]);
-
-  const getWordsForType = (type) => {
-    return Array.from(highlightedWords[type] || []).sort();
-  };
-
-  return (
-    <div>
-      <h1>Bible Verses</h1>
-      
-      {/* Data Set Selector */}
-      <div className="data-selector">
-        <h3>Select Bible Data Set:</h3>
-        <div className="data-selector-buttons">
-          {Object.keys(dataSets).map(dataSetKey => (
-            <button
-              key={dataSetKey}
-              className={`data-selector-button ${selectedDataSet === dataSetKey ? 'active' : ''}`}
-              onClick={() => changeDataSet(dataSetKey)}
-            >
-              {dataSetKey} 
-              {dataSets[dataSetKey].sections && (
-                <span> ({dataSets[dataSetKey].sections.reduce((total, section) => 
-                  total + section.subsections.reduce((subTotal, subsection) => 
-                    subTotal + subsection.verses.length, 0), 0)} verses)</span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="controls">
-        <div className="word-frequency-legend">
-          <h4>Word Highlighting Legend:</h4>
-          <div className="legend-item">
-            <span className="highlighted type1">Blue</span> - 1 X Words
-          </div>
-          <div className="legend-item">
-            <span className="highlighted type2">Green</span> - 2 X Words
-          </div>
-          <div className="legend-item">
-            <span className="highlighted type3">Orange</span> - 3 X Words
-          </div>
-        </div>
-
-        {/* Division Filter Controls */}
-        {Object.keys(divisions).length > 0 && (
-          <div className="division-filter-controls">
-            <h4>Filter by Divisions:</h4>
-            <div className="division-toggles">
-              {Object.entries(divisions).map(([division, count]) => (
-                <button 
-                  key={division}
-                  className={`division-toggle ${selectedDivisions.has(division) ? 'active' : ''}`}
-                  onClick={() => toggleDivision(division)}
-                >
-                  {division} ({count})
-                </button>
-              ))}
-            </div>
+        function createDataSetButtons() {
+            const container = document.getElementById('dataSetButtons');
+            container.innerHTML = '';
             
-            {selectedDivisions.size > 0 && (
-              <div>
-                <button onClick={clearDivisionFilter} className="clear-search">
-                  Clear Division Filter
-                </button>
-                <div className="division-stats">
-                  Active divisions: {Array.from(selectedDivisions).join(', ')}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+            Object.keys(dataSets).forEach(dataSetKey => {
+                const button = document.createElement('button');
+                button.className = `selector-button ${state.selectedDataSet === dataSetKey ? 'active' : ''}`;
+                const verseCount = getTotalVerseCount(dataSets[dataSetKey]);
+                button.textContent = `${dataSetNames[dataSetKey] || dataSetKey} (${verseCount} verses)`;
+                button.onclick = () => changeDataSet(dataSetKey);
+                container.appendChild(button);
+            });
+        }
 
-        {/* Charting Filter Controls */}
-        {Object.keys(chartingCategories).length > 0 && (
-          <div className="charting-filter-controls">
-            <h4>Filter by Charting Categories:</h4>
-            <div className="charting-category-toggles">
-              {Object.entries(chartingCategories).map(([category, count]) => (
-                <button 
-                  key={category}
-                  className={`charting-category-toggle ${selectedChartingCategories.has(category) ? 'active' : ''}`}
-                  onClick={() => toggleChartingCategory(category)}
-                >
-                  {category} ({count})
-                </button>
-              ))}
-            </div>
+        function getTotalVerseCount(data) {
+            if (!data.sections) return 0;
+            return data.sections.reduce((total, section) =>
+                total + section.subsections.reduce((subTotal, subsection) =>
+                    subTotal + subsection.verses.length, 0), 0);
+        }
+
+        function changeDataSet(dataSetKey) {
+            state.selectedDataSet = dataSetKey;
+            state.searchTerm = '';
+            state.selectedSections = new Set();
+            state.activeWordFilter = null;
+            state.selectedSpecificWords = new Set();
+            state.showWordMenu = false;
+            state.selectedChartingCategories = new Set();
+            state.selectedDivisions = new Set();
+            state.showOnlyLearned = false;
+            state.showOnlyUnlearned = false;
             
-            {selectedChartingCategories.size > 0 && (
-              <div>
-                <button onClick={clearChartingFilter} className="clear-search">
-                  Clear Charting Filter
-                </button>
-                <div className="charting-stats">
-                  Active filters: {Array.from(selectedChartingCategories).join(', ')}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+            document.getElementById('searchBox').value = '';
+            document.getElementById('clearButton').style.display = 'none';
+            
+            // Select all sections by default
+            if (dataSets[dataSetKey].sections) {
+                state.selectedSections = new Set(dataSets[dataSetKey].sections.map(s => s.sectionNumber));
+            }
+            
+            createDataSetButtons();
+            updateSectionToggles();
+            updateWordStats();
+            updateVerseSplitMap();
+            updateChartingCategories();
+            updateDivisions();
+            updateAllFilterToggles();
+            renderVerses();
+            updateStats();
+        }
 
-        <div className="word-filter-controls">
-          <h4>Filter by Word Types:</h4>
-          <div className="word-type-toggles">
-            <button 
-              className={`word-type-toggle ${activeWordFilter === 'type1' ? 'active' : ''}`}
-              onClick={() => toggleWordFilter('type1')}
-            >
-              Type 1 Words ({highlightedWords.type1?.size || 0})
-            </button>
-            <button 
-              className={`word-type-toggle ${activeWordFilter === 'type2' ? 'active' : ''}`}
-              onClick={() => toggleWordFilter('type2')}
-            >
-              Type 2 Words ({highlightedWords.type2?.size || 0})
-            </button>
-            <button 
-              className={`word-type-toggle ${activeWordFilter === 'type3' ? 'active' : ''}`}
-              onClick={() => toggleWordFilter('type3')}
-            >
-              Type 3 Words ({highlightedWords.type3?.size || 0})
-            </button>
-          </div>
-          
-          {activeWordFilter && (
-            <div className="word-list-dropdown">
-              <button 
-                className="word-list-button"
-                onClick={() => setShowWordMenu(!showWordMenu)}
-              >
-                Select Specific Words ({selectedSpecificWords.size} selected)
-              </button>
-              
-              {showWordMenu && (
-                <div className="word-list-menu">
-                  {getWordsForType(activeWordFilter).map(word => (
-                    <div
-                      key={word}
-                      className={`word-list-item ${selectedSpecificWords.has(word) ? 'selected' : ''}`}
-                      onClick={() => toggleSpecificWord(word)}
-                    >
-                      {word}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          
-          {activeWordFilter && (
-            <div style={{marginTop: '10px', fontSize: '14px', color: '#666'}}>
-              {selectedSpecificWords.size > 0 
-                ? `Filtering by: ${Array.from(selectedSpecificWords).join(', ')}`
-                : `Showing all verses with ${activeWordFilter} words`
-              }
-            </div>
-          )}
-        </div>
-      
-        <div className="filter-controls">
-          <h3>Search:</h3>
-          <input
-            type="text"
-            placeholder="Search verses by text or reference..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-box"
-          />
-          {searchTerm && (
-            <button onClick={clearSearch} className="clear-search">
-              Clear Search
-            </button>
-          )}
-        </div>
+        function updateSectionToggles() {
+            const container = document.getElementById('sectionToggles');
+            container.innerHTML = '';
+            
+            const currentData = dataSets[state.selectedDataSet];
+            if (!currentData.sections) return;
+            
+            currentData.sections.forEach(section => {
+                const toggle = document.createElement('div');
+                toggle.className = `section-checkbox ${state.selectedSections.has(section.sectionNumber) ? 'active' : ''}`;
+                toggle.textContent = `${section.sectionNumber} - ${section.sectionTitle}`;
+                toggle.onclick = () => toggleSection(section.sectionNumber);
+                container.appendChild(toggle);
+            });
+        }
 
-        {currentBibleData.sections && (
-          <div className="filter-controls">
-            <h3>Filter by Sections:</h3>
-            {currentBibleData.sections.map(section => (
-              <label key={section.sectionNumber}>
-                <input
-                  type="checkbox"
-                  checked={selectedSections.has(section.sectionNumber)}
-                  onChange={() => toggleSection(section.sectionNumber)}
-                />
-                {section.sectionNumber} - {section.sectionTitle}
-              </label>
-            ))}
-          </div>
-        )}
+        function toggleSection(sectionNumber) {
+            if (state.selectedSections.has(sectionNumber)) {
+                state.selectedSections.delete(sectionNumber);
+            } else {
+                state.selectedSections.add(sectionNumber);
+            }
+            updateSectionToggles();
+            renderVerses();
+            updateStats();
+        }
 
-        <div className="filter-controls">
-          <h3>Filter by Learning Status:</h3>
-          <label>
-            <input
-              type="checkbox"
-              checked={showOnlyLearned}
-              onChange={(e) => {
-                setShowOnlyLearned(e.target.checked);
-                if (e.target.checked) setShowOnlyUnlearned(false);
-              }}
-            />
-            Show only learned verses
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={showOnlyUnlearned}
-              onChange={(e) => {
-                setShowOnlyUnlearned(e.target.checked);
-                if (e.target.checked) setShowOnlyLearned(false);
-              }}
-            />
-            Show only unlearned verses
-          </label>
-        </div>
-      
-        <div className="stats">
-          <strong>
-            Showing: {searchResultsCount} of {totalVerses} verses | 
-            Progress: {learnedCount} learned ({totalVerses > 0 ? Math.round((learnedCount / totalVerses) * 100) : 0}%)
-            {selectedChartingCategories.size > 0 && (
-              <span> | Charting: {Array.from(selectedChartingCategories).join(', ')}</span>
-            )}
-            {selectedDivisions.size > 0 && (
-              <span> | Divisions: {Array.from(selectedDivisions).join(', ')}</span>
-            )}
-          </strong>
-        </div>
-      </div>
-    
-      <SectionList 
-        sections={filteredSections} 
-        learnedVerses={learnedVerses}
-        toggleVerseStatus={toggleVerseStatus}
-        showOnlyLearned={showOnlyLearned}
-        showOnlyUnlearned={showOnlyUnlearned}
-        searchTerm={searchTerm}
-        wordFrequency={wordFrequency}
-      />
-    </div>
-  );
-}
+        function updateWordStats() {
+            const stats = {};
+            const currentData = dataSets[state.selectedDataSet];
+            
+            if (currentData.sections) {
+                currentData.sections.forEach(section => {
+                    section.subsections.forEach(subsection => {
+                        subsection.verses.forEach(verse => {
+                            verse.text.split(/\b/).forEach(rawWord => {
+                                const word = rawWord.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase();
+                                if (word.length === 0) return;
+                                if (!stats[word]) stats[word] = { count: 0, refs: [] };
+                                stats[word].count += 1;
+                                stats[word].refs.push(verse.reference);
+                            });
+                        });
+                    });
+                });
+            }
+            
+            state.wordStats = stats;
+        }
 
-    function SectionList({ sections, learnedVerses, toggleVerseStatus, showOnlyLearned, showOnlyUnlearned, searchTerm, wordFrequency }) {
-        return (
-            <ul>
-                {sections.map((section) => (
-                    <li key={section.sectionNumber}>
-                        <strong>{section.sectionNumber} - {section.sectionTitle}</strong>
-                        <SubsectionList 
-                          subsections={section.subsections} 
-                          learnedVerses={learnedVerses}
-                          toggleVerseStatus={toggleVerseStatus}
-                          showOnlyLearned={showOnlyLearned}
-                          showOnlyUnlearned={showOnlyUnlearned}
-                          searchTerm={searchTerm}
-                          wordFrequency={wordFrequency}
-                        />
-                    </li>
-                ))}
-            </ul>
-        );
-    }
+        function updateChartingCategories() {
+            const categories = {};
+            const currentData = dataSets[state.selectedDataSet];
 
-    function SubsectionList({ subsections, learnedVerses, toggleVerseStatus, showOnlyLearned, showOnlyUnlearned, searchTerm, wordFrequency }) {
-        return (
-            <ul className="subsection">
-                {subsections.map((subsection) => {
+            if (currentData.sections) {
+                currentData.sections.forEach(section => {
+                    section.subsections.forEach(subsection => {
+                        subsection.verses.forEach(verse => {
+                            if (verse.chartingType) {
+                                let verseCategories = Array.isArray(verse.chartingType) ? verse.chartingType : [verse.chartingType];
+                                verseCategories.forEach(category => {
+                                    if (!categories[category]) categories[category] = 0;
+                                    categories[category]++;
+                                });
+                            }
+                            if (verse.text.includes('!')) {
+                                if (!categories['auto-exclamation']) categories['auto-exclamation'] = 0;
+                                categories['auto-exclamation']++;
+                            }
+                            if (verse.text.includes('?')) {
+                                if (!categories['auto-question']) categories['auto-question'] = 0;
+                                categories['auto-question']++;
+                            }
+                            if (verse.statementFlags && Array.isArray(verse.statementFlags)) {
+                                verse.statementFlags.forEach(flag => {
+                                    const flagType = `statement-${flag}`;
+                                    if (!categories[flagType]) categories[flagType] = 0;
+                                    categories[flagType]++;
+                                });
+                            }
+                        });
+                    });
+                });
+            }
+
+            state.chartingCategories = categories;
+        }
+
+        function updateDivisions() {
+            const divisionCounts = {};
+            const currentData = dataSets[state.selectedDataSet];
+            
+            if (currentData.sections) {
+                currentData.sections.forEach(section => {
+                    section.subsections.forEach(subsection => {
+                        subsection.verses.forEach(verse => {
+                            if (verse.divisions && Array.isArray(verse.divisions)) {
+                                verse.divisions.forEach(division => {
+                                    if (!divisionCounts[division]) divisionCounts[division] = 0;
+                                    divisionCounts[division]++;
+                                });
+                            }
+                        });
+                    });
+                });
+            }
+            
+            state.divisions = divisionCounts;
+        }
+
+        function computeUniqueBeginnings(verses) {
+            const root = { children: {}, refs: [] };
+            const splitVerses = verses.map(v => v.text.split(/\s+/));
+            
+            verses.forEach((v, idx) => {
+                let node = root;
+                node.refs.push(idx);
+                for (const word of splitVerses[idx]) {
+                    if (!node.children[word]) node.children[word] = { children: {}, refs: [] };
+                    node = node.children[word];
+                    node.refs.push(idx);
+                }
+            });
+            
+            const splitMap = {};
+            verses.forEach((v, idx) => {
+                let node = root;
+                let split = 0;
+                for (const word of splitVerses[idx]) {
+                    if (node.refs.length === 1) break;
+                    node = node.children[word];
+                    split++;
+                }
+                splitMap[v.reference] = split;
+            });
+            
+            return splitMap;
+        }
+
+        function updateVerseSplitMap() {
+            const currentData = dataSets[state.selectedDataSet];
+            if (!currentData.sections) {
+                state.verseSplitMap = {};
+                return;
+            }
+            
+            const allVerses = currentData.sections.flatMap(section =>
+                section.subsections.flatMap(subsection => subsection.verses)
+            );
+            
+            state.verseSplitMap = computeUniqueBeginnings(allVerses);
+        }
+
+        // Toggle functions
+        function toggleLearned() {
+            state.showOnlyLearned = !state.showOnlyLearned;
+            if (state.showOnlyLearned && state.showOnlyUnlearned) {
+                state.showOnlyUnlearned = false;
+                updateToggleState('unlearnedToggle', false);
+            }
+            updateToggleState('learnedToggle', state.showOnlyLearned);
+            renderVerses();
+            updateStats();
+        }
+
+        function toggleUnlearned() {
+            state.showOnlyUnlearned = !state.showOnlyUnlearned;
+            if (state.showOnlyUnlearned && state.showOnlyLearned) {
+                state.showOnlyLearned = false;
+                updateToggleState('learnedToggle', false);
+            }
+            updateToggleState('unlearnedToggle', state.showOnlyUnlearned);
+            renderVerses();
+            updateStats();
+        }
+
+        function updateToggleState(toggleId, isActive) {
+            const toggle = document.getElementById(toggleId);
+            if (isActive) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+        }
+
+        function updateWordFrequencyToggles() {
+            const container = document.getElementById('wordFrequencyToggles');
+            container.innerHTML = '';
+            
+            const typeWordMap = getTypeWordMap();
+            
+            [1, 2, 3].forEach(num => {
+                const type = `type${num}`;
+                const words = typeWordMap[type] || [];
+                const toggle = document.createElement('div');
+                toggle.className = `word-type-toggle ${state.activeWordFilter === type ? 'active' : ''}`;
+                toggle.textContent = `${num}x (${words.length})`;
+                toggle.onclick = () => toggleWordFilter(type);
+                container.appendChild(toggle);
+            });
+            
+            // Show/hide word list container
+            const wordListContainer = document.getElementById('wordListContainer');
+            if (state.activeWordFilter) {
+                wordListContainer.style.display = 'block';
+                const words = typeWordMap[state.activeWordFilter] || [];
+                document.getElementById('wordListButton').textContent = `${state.showWordMenu ? 'Hide' : 'Show'} Words (${words.length})`;
+                updateWordList();
+            } else {
+                wordListContainer.style.display = 'none';
+            }
+        }
+
+        function getTypeWordMap() {
+            const typeWordMap = { type1: [], type2: [], type3: [] };
+            Object.entries(state.wordStats).forEach(([word, stat]) => {
+                if (stat.count === 1) typeWordMap.type1.push(word);
+                if (stat.count === 2) typeWordMap.type2.push(word);
+                if (stat.count === 3) typeWordMap.type3.push(word);
+            });
+            return typeWordMap;
+        }
+
+        function toggleWordFilter(type) {
+            if (state.activeWordFilter === type) {
+                state.activeWordFilter = null;
+                state.selectedSpecificWords = new Set();
+            } else {
+                state.activeWordFilter = type;
+                state.selectedSpecificWords = new Set();
+            }
+            state.showWordMenu = false;
+            updateWordFrequencyToggles();
+            renderVerses();
+            updateStats();
+        }
+
+        function toggleWordList() {
+            state.showWordMenu = !state.showWordMenu;
+            const modal = document.getElementById('wordListModal');
+            modal.style.display = state.showWordMenu ? 'block' : 'none';
+            const typeWordMap = getTypeWordMap();
+            document.getElementById('wordListButton').textContent = `${state.showWordMenu ? 'Hide' : 'Show'} Words (${typeWordMap[state.activeWordFilter]?.length || 0})`;
+        }
+
+        function closeWordList() {
+            state.showWordMenu = false;
+            document.getElementById('wordListModal').style.display = 'none';
+            const typeWordMap = getTypeWordMap();
+            document.getElementById('wordListButton').textContent = `Show Words (${typeWordMap[state.activeWordFilter]?.length || 0})`;
+        }
+
+        function updateWordList() {
+            const container = document.getElementById('wordListItems');
+            container.innerHTML = '';
+            
+            if (!state.activeWordFilter) return;
+            
+            const typeWordMap = getTypeWordMap();
+            const words = typeWordMap[state.activeWordFilter] || [];
+            
+            words.forEach(word => {
+                const item = document.createElement('div');
+                item.className = `word-list-item ${state.selectedSpecificWords.has(word) ? 'selected' : ''}`;
+                item.textContent = word;
+                item.onclick = () => toggleSpecificWord(word);
+                container.appendChild(item);
+            });
+        }
+
+        function toggleSpecificWord(word) {
+            if (state.selectedSpecificWords.has(word)) {
+                state.selectedSpecificWords.delete(word);
+            } else {
+                state.selectedSpecificWords.add(word);
+            }
+            updateWordList();
+            renderVerses();
+            updateStats();
+        }
+
+        function updateChartingToggles() {
+            const container = document.getElementById('chartingToggles');
+            container.innerHTML = '';
+            
+            Object.entries(state.chartingCategories).forEach(([category, count]) => {
+                const toggle = document.createElement('div');
+                toggle.className = `charting-toggle ${state.selectedChartingCategories.has(category) ? 'active' : ''}`;
+                toggle.textContent = `${category} (${count})`;
+                toggle.onclick = () => toggleChartingCategory(category);
+                container.appendChild(toggle);
+            });
+            
+            if (Object.keys(state.chartingCategories).length > 0) {
+                const clearButton = document.createElement('div');
+                clearButton.className = 'charting-toggle clear-filter-button';
+                clearButton.textContent = 'Clear Charting';
+                clearButton.onclick = clearChartingFilter;
+                container.appendChild(clearButton);
+            }
+        }
+
+        function toggleChartingCategory(category) {
+            if (state.selectedChartingCategories.has(category)) {
+                state.selectedChartingCategories.delete(category);
+            } else {
+                state.selectedChartingCategories.add(category);
+            }
+            updateChartingToggles();
+            renderVerses();
+            updateStats();
+        }
+
+        function clearChartingFilter() {
+            state.selectedChartingCategories = new Set();
+            updateChartingToggles();
+            renderVerses();
+            updateStats();
+        }
+
+        function updateDivisionToggles() {
+            const container = document.getElementById('divisionToggles');
+            container.innerHTML = '';
+            
+            Object.entries(state.divisions).forEach(([division, count]) => {
+                const toggle = document.createElement('div');
+                toggle.className = `division-toggle ${state.selectedDivisions.has(division) ? 'active' : ''}`;
+                toggle.textContent = `${division} (${count})`;
+                toggle.onclick = () => toggleDivision(division);
+                container.appendChild(toggle);
+            });
+            
+            if (Object.keys(state.divisions).length > 0) {
+                const clearButton = document.createElement('div');
+                clearButton.className = 'division-toggle clear-division-button';
+                clearButton.textContent = 'Clear Divisions';
+                clearButton.onclick = clearDivisionFilter;
+                container.appendChild(clearButton);
+            }
+        }
+
+        function toggleDivision(division) {
+            if (state.selectedDivisions.has(division)) {
+                state.selectedDivisions.delete(division);
+            } else {
+                state.selectedDivisions.add(division);
+            }
+            updateDivisionToggles();
+            renderVerses();
+            updateStats();
+        }
+
+        function clearDivisionFilter() {
+            state.selectedDivisions = new Set();
+            updateDivisionToggles();
+            renderVerses();
+            updateStats();
+        }
+
+        function updateAllFilterToggles() {
+            updateToggleState('learnedToggle', state.showOnlyLearned);
+            updateToggleState('unlearnedToggle', state.showOnlyUnlearned);
+            updateWordFrequencyToggles();
+            updateChartingToggles();
+            updateDivisionToggles();
+        }
+
+        // WORD FILTER (frequency)
+        function verseMatchesWordFilter(verse) {
+            if (!state.activeWordFilter) return true;
+            const verseWords = verse.text.replace(/[^\w\s]/g, '').toLowerCase().split(/\s+/);
+            // If user picked specific words, filter for those
+            if (state.selectedSpecificWords.size > 0) {
+                return Array.from(state.selectedSpecificWords).some(word =>
+                    verseWords.includes(word)
+                );
+            }
+            // Otherwise filter by frequency group
+            const typeWordMap = getTypeWordMap();
+            const group = typeWordMap[state.activeWordFilter] || [];
+            return verseWords.some(w => group.includes(w));
+        }
+
+        function verseMatchesChartingFilter(verse) {
+            if (state.selectedChartingCategories.size === 0) return true;
+            const verseCategories = new Set();
+            if (verse.chartingType) verseCategories.add(verse.chartingType);
+            if (verse.text.includes('!')) verseCategories.add('exclamation');
+            if (verse.text.includes('?')) verseCategories.add('question');
+            if (verse.statementFlags && Array.isArray(verse.statementFlags)) {
+                verse.statementFlags.forEach(flag => {
+                    verseCategories.add(`statement-${flag}`);
+                });
+            }
+            return Array.from(state.selectedChartingCategories).some(selected =>
+                verseCategories.has(selected)
+            );
+        }
+
+        function verseMatchesDivisionFilter(verse) {
+            if (state.selectedDivisions.size === 0) return true;
+            if (!verse.divisions || !Array.isArray(verse.divisions)) return false;
+            return verse.divisions.some(division => state.selectedDivisions.has(division));
+        }
+
+        function getFilteredSections() {
+            const currentData = dataSets[state.selectedDataSet];
+            if (!currentData.sections) return [];
+            
+            let sections = currentData.sections.filter(section =>
+                state.selectedSections.has(section.sectionNumber)
+            );
+            
+            sections = sections.map(section => ({
+                ...section,
+                subsections: section.subsections.map(subsection => ({
+                    ...subsection,
+                    verses: subsection.verses.filter(verse => {
+                        const matchesSearch = !state.searchTerm.trim() ||
+                            verse.text.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                            verse.reference.toLowerCase().includes(state.searchTerm.toLowerCase());
+                        
+                        const isLearned = state.learnedVerses.has(verse.reference);
+                        const matchesLearnedFilter = !state.showOnlyLearned || isLearned;
+                        const matchesUnlearnedFilter = !state.showOnlyUnlearned || !isLearned;
+                        
+                        const matchesWordFilter = verseMatchesWordFilter(verse);
+                        const matchesChartingFilter = verseMatchesChartingFilter(verse);
+                        const matchesDivisionFilter = verseMatchesDivisionFilter(verse);
+                        
+                        return matchesSearch && matchesLearnedFilter && matchesUnlearnedFilter && 
+                               matchesWordFilter && matchesChartingFilter && matchesDivisionFilter;
+                    })
+                })).filter(subsection => subsection.verses.length > 0)
+            })).filter(section => section.subsections.length > 0);
+            
+            return sections;
+        }
+
+        function renderVerses() {
+            const container = document.getElementById('versesContainer');
+            container.innerHTML = '';
+
+            const filteredSections = getFilteredSections();
+
+            filteredSections.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.style.marginBottom = '14px';
+
+                const sectionHeader = document.createElement('div');
+                sectionHeader.className = 'section-header';
+                sectionHeader.textContent = `${section.sectionNumber} - ${section.sectionTitle}`;
+                sectionDiv.appendChild(sectionHeader);
+
+                section.subsections.forEach(subsection => {
+                    const subsectionDiv = document.createElement('div');
+                    subsectionDiv.style.marginLeft = '8px';
+
+                    const subsectionHeader = document.createElement('div');
+                    subsectionHeader.className = 'subsection-header';
+                    subsectionHeader.textContent = `${subsection.subsectionNumber} - ${subsection.subsectionTitle}`;
+                    subsectionDiv.appendChild(subsectionHeader);
+
                     const learnedInSubsection = subsection.verses.filter(verse => 
-                      learnedVerses.has(verse.reference)).length;
-                    
-                    return (
-                        <li key={subsection.subsectionNumber}>
-                            <strong>{subsection.subsectionNumber} - {subsection.subsectionTitle}</strong>
-                            <br />
-                            <em>{subsection.verseCount} verses ({subsection.totalVerseCount}) - {learnedInSubsection} learned</em>
-                            <VerseList 
-                              verses={subsection.verses} 
-                              learnedVerses={learnedVerses}
-                              toggleVerseStatus={toggleVerseStatus}
-                              showOnlyLearned={showOnlyLearned}
-                              showOnlyUnlearned={showOnlyUnlearned}
-                              searchTerm={searchTerm}
-                              wordFrequency={wordFrequency}
-                            />
-                        </li>
-                    );
-                })}
-            </ul>
-        );
-    }
+                        state.learnedVerses.has(verse.reference)
+                    ).length;
 
-    function VerseList({ verses, learnedVerses, toggleVerseStatus, showOnlyLearned, showOnlyUnlearned, searchTerm, wordFrequency }) {
-        const filteredVerses = verses.filter(verse => {
-            const isLearned = learnedVerses.has(verse.reference);
-            if (showOnlyLearned) return isLearned;
-            if (showOnlyUnlearned) return !isLearned;
-            return true;
-        });
-      
-        return (
-            <ul className="verse-list">
-                {filteredVerses.map((verse, index) => (
-                    <li key={index} className={`verse-item ${learnedVerses.has(verse.reference) ? 'learned' : ''}`}>
-                        <strong>{verse.reference}:</strong> <VerseText verse={verse} searchTerm={searchTerm} wordFrequency={wordFrequency} />
+                    const subsectionStats = document.createElement('div');
+                    subsectionStats.className = 'subsection-stats';
+                    subsectionStats.textContent = `${subsection.verseCount} verses (${subsection.totalVerseCount}) - ${learnedInSubsection} learned`;
+                    subsectionDiv.appendChild(subsectionStats);
 
-                        {/* Statement and exclamation indicators */}
-                        <div className="verse-statement-flags">
-                            {verse.text.includes('!') && (
-                                <div className="exclamation-indicator">
-                                    Contains Exclamation
-                                </div>
-                            )}
-                            {verse.text.includes('?') && (
-                                <div className="question-indicator">
-                                    Contains Question
-                                </div>
-                            )}
-                            {verse.statementFlags && verse.statementFlags.map(flag => (
-                                <div key={flag} className="statement-indicator">
-                                    Statement: {flag}
-                                </div>
-                            ))}
-                            {verse.chartingType && (
-                                <div className="statement-indicator">
-                                    Category: {verse.chartingType}
-                                </div>
-                            )}
-                        </div>
+                    subsection.verses.forEach(verse => {
+                        const verseDiv = document.createElement('div');
+                        verseDiv.className = `verse-item ${state.learnedVerses.has(verse.reference) ? 'learned' : ''}`;
 
-                        <button 
-                          className={`learned-button ${learnedVerses.has(verse.reference) ? 'learned' : ''}`}
-                          onClick={() => toggleVerseStatus(verse.reference)}
-                        >
-                          {learnedVerses.has(verse.reference) ? 'Mark as Unlearned' : 'Mark as Learned'}
-                        </button>
-                    </li>
-                ))}
-            </ul>
-        );
-    }
+                        const verseRef = document.createElement('div');
+                        verseRef.className = 'verse-reference';
+                        verseRef.textContent = `${verse.reference}:`;
+                        verseDiv.appendChild(verseRef);
 
-    function VerseText({ verse, searchTerm, wordFrequency }) {
-      const text = verse.text;
-      const existingHighlights = verse.highlights || [];
-      
-      // First, handle search highlighting
-      if (searchTerm && searchTerm.trim()) {
-        const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        const searchHighlightedParts = text.split(regex);
-        
-        return (
-          <span>
-            {searchHighlightedParts.map((part, index) => {
-              const isSearchMatch = part.toLowerCase() === searchTerm.toLowerCase();
-              if (isSearchMatch) {
-                return <span key={index} className="search-highlight">{part}</span>;
-              }
-              
-              // For non-search parts, apply frequency and existing highlights
-              return <HighlightedTextPart key={index} text={part} existingHighlights={existingHighlights} wordFrequency={wordFrequency} />;
-            })}
-          </span>
-        );
-      }
+                        const verseText = document.createElement('div');
+                        verseText.innerHTML = renderVerseText(verse);
+                        verseDiv.appendChild(verseText);
 
-      // No search term, apply frequency and existing highlighting
-      return <HighlightedTextPart text={text} existingHighlights={existingHighlights} wordFrequency={wordFrequency} />;
-    }
+                        // Indicators
+                        const indicatorsDiv = document.createElement('div');
+                        indicatorsDiv.style.display = 'flex';
+                        indicatorsDiv.style.flexWrap = 'wrap';
+                        indicatorsDiv.style.marginTop = '3px';
 
-    function HighlightedTextPart({ text, existingHighlights, wordFrequency }) {
-  // Check if text contains "/" for verse beginning highlighting
-  const slashIndex = text.indexOf('/');
-  
-  if (slashIndex !== -1) {
-    // Split text at the "/" but keep the slash with the first part
-    const beforeSlash = text.substring(0, slashIndex + 1); // Include the "/"
-    const afterSlash = text.substring(slashIndex + 1);
-    
-    return (
-      <span>
-        <ProcessWords text={beforeSlash} existingHighlights={existingHighlights} isVerseBeginning={true} />
-        <ProcessWords text={afterSlash} existingHighlights={existingHighlights} isVerseBeginning={false} />
-      </span>
-    );
-  }
-  
-  // No slash, process normally
-  return <ProcessWords text={text} existingHighlights={existingHighlights} isVerseBeginning={false} />;
-}
+                        if (verse.text.includes('!')) {
+                            const indicator = document.createElement('span');
+                            indicator.className = 'indicator exclamation-indicator';
+                            indicator.textContent = 'Contains Exclamation';
+                            indicatorsDiv.appendChild(indicator);
+                        }
 
-    function ProcessWords({ text, existingHighlights, isVerseBeginning }) {
-  // Split text into words while preserving spaces and punctuation
-  const words = text.split(/(\s+|[^\w\s]+)/);
-  
-  return (
-    <span className={isVerseBeginning ? 'verse-beginning' : ''}>
-      {words.map((word, index) => {
-        // Check if this word has an existing highlight from JSON data
-        const existingHighlight = existingHighlights.find(h => 
-          text.indexOf(h.word, text.indexOf(word)) === text.indexOf(word)
-        );
-        
-        if (existingHighlight) {
-          // Apply JSON highlight - if it's in verse beginning, it will inherit the underline/bold
-          return <span key={index} className={`highlighted ${existingHighlight.type}`}>{word}</span>;
+                        if (verse.text.includes('?')) {
+                            const indicator = document.createElement('span');
+                            indicator.className = 'indicator question-indicator';
+                            indicator.textContent = 'Contains Question';
+                            indicatorsDiv.appendChild(indicator);
+                        }
+
+                        if (verse.statementFlags) {
+                            verse.statementFlags.forEach(flag => {
+                                const indicator = document.createElement('span');
+                                indicator.className = 'indicator statement-indicator';
+                                indicator.textContent = `Statement: ${flag}`;
+                                indicatorsDiv.appendChild(indicator);
+                            });
+                        }
+
+                        if (verse.chartingType) {
+                            let categories = Array.isArray(verse.chartingType) ? verse.chartingType : [verse.chartingType];
+                            categories.forEach(category => {
+                                const indicator = document.createElement('span');
+                                indicator.className = 'indicator statement-indicator';
+                                indicator.textContent = `Category: ${category}`;
+                                indicatorsDiv.appendChild(indicator);
+                            });
+                        }
+
+                        verseDiv.appendChild(indicatorsDiv);
+
+                        // Button container for organizing buttons
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.style.display = 'flex';
+                        buttonContainer.style.gap = '8px';
+                        buttonContainer.style.marginTop = '7px';
+
+                        const editCategoryButton = document.createElement('button');
+                        editCategoryButton.className = 'edit-category-button';
+                        editCategoryButton.textContent = verse.chartingType ? 'Edit Category' : 'Add Category';
+                        editCategoryButton.onclick = () => openCategoryEditor(verse.reference);
+                        buttonContainer.appendChild(editCategoryButton);
+
+                        const learnedButton = document.createElement('button');
+                        learnedButton.className = `learned-button ${state.learnedVerses.has(verse.reference) ? 'active' : ''}`;
+                        learnedButton.textContent = state.learnedVerses.has(verse.reference) ? 'Mark as Unlearned' : 'Mark as Learned';
+                        learnedButton.onclick = () => toggleVerseStatus(verse.reference);
+                        buttonContainer.appendChild(learnedButton);
+
+                        verseDiv.appendChild(buttonContainer);
+                        subsectionDiv.appendChild(verseDiv);
+                    });
+
+                    sectionDiv.appendChild(subsectionDiv);
+                });
+
+                container.appendChild(sectionDiv);
+            });
+        }
+
+        function renderVerseText(verse) {
+            const text = verse.text;
+            const existingHighlights = verse.highlights || [];
+            const uniqueSplitIdx = state.verseSplitMap[verse.reference] || 0;
+            
+            if (state.searchTerm && state.searchTerm.trim()) {
+                const regex = new RegExp(`(${state.searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                const parts = text.split(regex);
+                
+                return parts.map(part => {
+                    if (part.toLowerCase() === state.searchTerm.toLowerCase()) {
+                        return `<span class="search-highlight">${part}</span>`;
+                    } else {
+                        return processWords(part, existingHighlights, verse.reference, uniqueSplitIdx);
+                    }
+                }).join('');
+            }
+            
+            return processWords(text, existingHighlights, verse.reference, uniqueSplitIdx);
+        }
+
+        function processWords(text, existingHighlights, verseRef, uniqueSplitIdx) {
+            const words = text.split(/(\s+|[^\w\s]+)/);
+            let realWordIdx = 0;
+            let result = '';
+
+            words.forEach((word, idx) => {
+                const isWord = /[a-zA-Z0-9]/.test(word);
+                let styles = [];
+                const rawWord = word.replace(/[^a-zA-Z0-9'-]/g, '');
+                const lowerWord = rawWord.toLowerCase();
+
+                const highlight = existingHighlights.find(h => 
+                    h.word && h.word.toLowerCase() === lowerWord
+                );
+
+                const stat = state.wordStats[lowerWord];
+
+                if (isWord && realWordIdx < uniqueSplitIdx) {
+                    styles.push('verse-beginning');
+                }
+
+                // Apply word frequency colors first (as base colors)
+                if (stat) {
+                    if (stat.count === 1) styles.push('type1');
+                    if (stat.count === 2) styles.push('type2');
+                    if (stat.count === 3) styles.push('type3');
+                }
+
+                // Apply highlight styles on top (these will override background/text as needed)
+                if (highlight) {
+                    if (highlight.type === 'proper') styles.push('proper-name');
+                    if (highlight.type === 'animal') styles.push('animal');
+                    if (highlight.type === 'location') styles.push('location');
+                }
+
+                let refsText = '';
+                if (stat && (stat.count === 2 || stat.count === 3) && word.trim().length > 0) {
+                    const otherRefs = stat.refs.filter(ref => ref !== verseRef);
+                    const previous = words.slice(0, idx).filter(w => 
+                        w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase() === lowerWord
+                    ).length;
+
+                    if (previous === 0 && otherRefs.length > 0) {
+                        refsText = `<span class="refs-text">(${otherRefs.join(', ')})</span>`;
+                    }
+                }
+
+                if (styles.length > 0) {
+                    result += `<span class="${styles.join(' ')}">${word}</span>`;
+                } else {
+                    result += word;
+                }
+
+                result += refsText;
+
+                if (isWord && realWordIdx === uniqueSplitIdx - 1) {
+                    result += '<strong>/</strong>';
+                }
+
+                if (isWord) realWordIdx++;
+            });
+
+            return result;
         }
         
-        // Return word without additional highlighting (will inherit verse-beginning if applicable)
-        return word;
-      })}
-    </span>
-  );
-}
+        function toggleVerseStatus(reference) {
+            if (state.learnedVerses.has(reference)) {
+                state.learnedVerses.delete(reference);
+            } else {
+                state.learnedVerses.add(reference);
+            }
+            renderVerses();
+            updateStats();
+        }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+        function updateStats() {
+            const currentData = dataSets[state.selectedDataSet];
+            const totalVerses = getTotalVerseCount(currentData);
+            const learnedCount = state.learnedVerses.size;
+            const filteredSections = getFilteredSections();
+            const searchResultsCount = filteredSections.reduce((total, section) =>
+                total + section.subsections.reduce((subTotal, subsection) =>
+                    subTotal + subsection.verses.length, 0), 0
+            );
+            
+            const progressPercent = totalVerses > 0 ? Math.round((learnedCount / totalVerses) * 100) : 0;
+            
+            let statsText = `Showing: ${searchResultsCount} of ${totalVerses} verses | Progress: ${learnedCount} learned (${progressPercent}%)`;
+            
+            if (state.selectedChartingCategories.size > 0) {
+                statsText += ` | Charting: ${Array.from(state.selectedChartingCategories).join(', ')}`;
+            }
+            
+            if (state.selectedDivisions.size > 0) {
+                statsText += ` | Divisions: ${Array.from(state.selectedDivisions).join(', ')}`;
+            }
+            
+            document.getElementById('statsText').textContent = statsText;
+        }
+
+        function clearSearch() {
+            state.searchTerm = '';
+            document.getElementById('searchBox').value = '';
+            document.getElementById('clearButton').style.display = 'none';
+            renderVerses();
+            updateStats();
+        }
+
+        function openFilters() {
+            document.getElementById('filterOverlay').classList.add('open');
+            document.getElementById('filterDrawer').classList.add('open');
+        }
+
+        function closeFilters() {
+            document.getElementById('filterOverlay').classList.remove('open');
+            document.getElementById('filterDrawer').classList.remove('open');
+        }
+        
+        // Category Functions
+        
+        function openCategoryEditor(verseReference) {
+            state.editingCategory = true;
+            state.editingVerse = verseReference;
+
+            // Find the verse
+            const currentData = dataSets[state.selectedDataSet];
+            let verse = null;
+            currentData.sections.forEach(section => {
+                section.subsections.forEach(subsection => {
+                    const found = subsection.verses.find(v => v.reference === verseReference);
+                    if (found) verse = found;
+                });
+            });
+
+            if (verse) {
+                document.getElementById('editingVerseRef').textContent = verse.reference;
+                document.getElementById('newCategoryInput').value = '';
+                updateCurrentCategoriesList(verse);
+                document.getElementById('categoryEditorOverlay').style.display = 'block';
+                document.getElementById('categoryEditor').style.display = 'block';
+                document.getElementById('newCategoryInput').focus();
+            }
+        }
+
+        function updateCurrentCategoriesList(verse) {
+            const container = document.getElementById('currentCategoriesList');
+            container.innerHTML = '';
+
+            // Handle both single chartingType and array of categories
+    let categories = [];
+    if (verse.chartingType) {
+        if (Array.isArray(verse.chartingType)) {
+            categories = verse.chartingType;
+        } else {
+            categories = [verse.chartingType];
+        }
+    }
+    
+    if (categories.length === 0) {
+        container.innerHTML = '<p style="color: #666; font-style: italic;">No categories assigned</p>';
+                return;
+            }
+
+            categories.forEach((category, index) => {
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+
+                const categoryText = document.createElement('span');
+                categoryText.className = 'category-item-text';
+                categoryText.textContent = category;
+
+                const removeButton = document.createElement('button');
+                removeButton.className = 'remove-single-category';
+                removeButton.textContent = 'Remove';
+                removeButton.onclick = () => removeSingleCategory(index);
+
+                categoryItem.appendChild(categoryText);
+                categoryItem.appendChild(removeButton);
+                container.appendChild(categoryItem);
+            });
+        }
+
+        function addNewCategory() {
+            if (!state.editingVerse) return;
+
+            const newCategory = document.getElementById('newCategoryInput').value.trim();
+            if (!newCategory) return;
+
+            // Find and update the verse
+            const currentData = dataSets[state.selectedDataSet];
+            currentData.sections.forEach(section => {
+        section.subsections.forEach(subsection => {
+            const verse = subsection.verses.find(v => v.reference === state.editingVerse);
+            if (verse) {
+                // Convert to array if needed
+                let categories = [];
+                if (verse.chartingType) {
+                    if (Array.isArray(verse.chartingType)) {
+                        categories = [...verse.chartingType];
+                    } else {
+                        categories = [verse.chartingType];
+                    }
+                }
+                
+                // Add new category if not already present
+                if (!categories.includes(newCategory)) {
+                    categories.push(newCategory);
+                    verse.chartingType = categories;
+                }
+                
+                // Update the display
+                updateCurrentCategoriesList(verse);
+                document.getElementById('newCategoryInput').value = '';
+            }
+        });
+    });
+
+            // Update charting categories and re-render
+            updateChartingCategories();
+            updateChartingToggles();
+            renderVerses();
+            updateStats();
+        }
+
+        function removeSingleCategory(categoryIndex) {
+            if (!state.editingVerse) return;
+
+            // Find and update the verse
+            const currentData = dataSets[state.selectedDataSet];
+            currentData.sections.forEach(section => {
+                section.subsections.forEach(subsection => {
+                    const verse = subsection.verses.find(v => v.reference === state.editingVerse);
+                    if (verse && verse.chartingType) {
+                        let categories = [];
+                        if (Array.isArray(verse.chartingType)) {
+                            categories = [...verse.chartingType];
+                        } else {
+                            categories = [verse.chartingType];
+                        }
+
+                        // Remove the category at the specified index
+                        categories.splice(categoryIndex, 1);
+
+                        // Update or remove chartingType
+                        if (categories.length === 0) {
+                            delete verse.chartingType;
+                        } else {
+                            verse.chartingType = categories;
+                        }
+
+                        // Update the display
+                        updateCurrentCategoriesList(verse);
+                    }
+                });
+            });
+
+            // Update charting categories and re-render
+            updateChartingCategories();
+            updateChartingToggles();
+            renderVerses();
+            updateStats();
+        }
+
+        function closeCategoryEditor() {
+            state.editingCategory = false;
+            state.editingVerse = null;
+            document.getElementById('categoryEditorOverlay').style.display = 'none';
+            document.getElementById('categoryEditor').style.display = 'none';
+            document.getElementById('newCategoryInput').value = '';
+        }
+        // Add keyboard support for the category editor
+        document.addEventListener('keydown', function(e) {
+            if (state.editingCategory) {
+                if (e.key === 'Enter') {
+                    addNewCategory();
+                } else if (e.key === 'Escape') {
+                    closeCategoryEditor();
+                }
+            }
+        });
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
