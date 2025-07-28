@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BQ Study Version 2.2</title>
+    <title>BQ Study Version 2.2.1</title>
     <style>
         * {
             margin: 0;
@@ -675,6 +675,7 @@
 .verse-popup-item:last-child {
     margin-bottom: 0;
 }
+
 /* Definition popup styles */
 .definition-word {
     position: relative;
@@ -813,6 +814,23 @@
         margin-bottom: 12px;
     }
     
+    /* Ensure verse popups don't go off screen edges */
+    .verse-popup {
+        max-width: calc(100vw - 20px);
+    }
+    
+    /* Use JavaScript for better positioning */
+    .verse-popup.align-left {
+        left: 10px;
+        transform: none;
+    }
+    
+    .verse-popup.align-right {
+        left: auto;
+        right: 10px;
+        transform: none;
+    }
+    
     /* Smart definition popups positioning on mobile */
     .definition-popup {
         position: absolute;
@@ -874,21 +892,6 @@
         display: inline-flex;
         align-items: center;
     }
-    
-    /* Ensure verse popups don't go off screen edges */
-    .verse-popup {
-        max-width: calc(100vw - 20px);
-    }
-    
-    /* Smart positioning for verse popups on edges */
-.verse-popup {
-    left: 50%;
-    transform: translateX(-50%);
-    /* Ensure it doesn't go off left edge */
-    left: max(calc(50% - 50vw + 10px), 50%);
-    /* Ensure it doesn't go off right edge */
-    left: min(max(calc(50% - 50vw + 10px), 50%), calc(100vw - 300px - 10px));
-}
 }
 
 /* Small mobile adjustments */
@@ -945,7 +948,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="header">Bible Verses</h1>
+        <h1 class="header">BQ Study Version 2.2.1</h1>
         
         <div class="selector-box">
             <div class="selector-title">Select Bible Data Set:</div>
@@ -4836,6 +4839,30 @@ function toggleVerseStatus(reference) {
         }
         
         // mobile support functions 
+function positionVersePopup(verseElement) {
+    if (window.innerWidth <= 768) {
+        const popup = verseElement.querySelector('.verse-popup');
+        if (popup) {
+            const triggerRect = verseElement.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            
+            // Reset classes
+            popup.classList.remove('align-left', 'align-right');
+            
+            // Get popup width
+            const popupWidth = popup.offsetWidth;
+            const centerPos = triggerRect.left + (triggerRect.width / 2);
+            
+            // Check if popup would go off screen
+            if (centerPos - (popupWidth / 2) < 10) {
+                popup.classList.add('align-left');
+            } else if (centerPos + (popupWidth / 2) > viewportWidth - 10) {
+                popup.classList.add('align-right');
+            }
+        }
+    }
+}
+
 function positionDefinitionPopup(definitionElement) {
     if (window.innerWidth <= 768) {
         const popup = definitionElement.querySelector('.definition-popup');
@@ -4876,7 +4903,7 @@ function positionDefinitionPopup(definitionElement) {
     }
 }
 
-        function positionPopupSafely(popupElement) {
+function positionPopupSafely(popupElement) {
             if (window.innerWidth <= 768) {
                 const popup = popupElement.querySelector('.verse-popup, .definition-popup');
                 if (popup) {
@@ -4937,7 +4964,10 @@ function addTapSupport() {
                     };
                     popup.appendChild(closeBtn);
                 }
-                
+                // Position verse popups safely on mobile
+                if (clickedPopupElement.classList.contains('refs-text')) {
+                    setTimeout(() => positionVersePopup(clickedPopupElement), 10);
+                }
                 // Position definition popups safely on mobile
                 if (clickedPopupElement.classList.contains('definition-word')) {
                     setTimeout(() => positionDefinitionPopup(clickedPopupElement), 10);
@@ -4960,7 +4990,8 @@ function addTapSupport() {
         }
     });
 }
-        function initMobileSupport() {
+        
+function initMobileSupport() {
             // Detect if device supports hover
             const hasHover = window.matchMedia('(hover: hover)').matches;
 
@@ -4969,6 +5000,7 @@ function addTapSupport() {
                 addTapSupport();
             }
         }
+
         function closeAllPopups() {
             document.querySelectorAll('.refs-text.active, .definition-word.active').forEach(element => {
                 element.classList.remove('active');
