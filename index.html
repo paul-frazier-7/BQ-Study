@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bible Verses Study App</title>
+    <title>BQ Study Version 2.2</title>
     <style>
         * {
             margin: 0;
@@ -881,10 +881,14 @@
     }
     
     /* Smart positioning for verse popups on edges */
-    .verse-popup {
-        left: max(10px, min(50%, calc(100vw - 150px)));
-        transform: translateX(min(-50%, -10px));
-    }
+.verse-popup {
+    left: 50%;
+    transform: translateX(-50%);
+    /* Ensure it doesn't go off left edge */
+    left: max(calc(50% - 50vw + 10px), 50%);
+    /* Ensure it doesn't go off right edge */
+    left: min(max(calc(50% - 50vw + 10px), 50%), calc(100vw - 300px - 10px));
+}
 }
 
 /* Small mobile adjustments */
